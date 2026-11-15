@@ -1,10 +1,10 @@
-# PrepTrack – Interview Preparation Platform
+﻿# PrepTrack â€“ Interview Preparation Platform
 
 A full-stack, enterprise-grade interview preparation platform designed to help students and software engineers prepare for technical placements, campus recruitment, and product company interviews (TCS, Infosys, Wipro, Accenture, Amazon, Google, Microsoft, and Cognizant).
 
 ---
 
-## 🛠️ Technology Stack
+## ðŸ› ï¸ Technology Stack
 
 ### **Frontend**
 - **React.js 18** with Modern Hooks & Functional Components
@@ -25,7 +25,7 @@ A full-stack, enterprise-grade interview preparation platform designed to help s
 
 ---
 
-## 🚀 Key Modules & Features
+## ðŸš€ Key Modules & Features
 
 ### 1. Authentication & Security
 - User registration and login with input validation.
@@ -80,10 +80,10 @@ A full-stack, enterprise-grade interview preparation platform designed to help s
 - **Exam Workspace**:
   - Split layout with active question, options, and actions (Previous, Next, Clear Response, Mark for Review).
   - **Interactive Question Palette**: color-coded exam dots matching national testing standards:
-    - 🟢 Green: Answered
-    - 🟡 Yellow: Marked for Review
-    - 🔵 Blue: Answered & Marked for Review
-    - ⚪ Gray: Not visited
+    - ðŸŸ¢ Green: Answered
+    - ðŸŸ¡ Yellow: Marked for Review
+    - ðŸ”µ Blue: Answered & Marked for Review
+    - âšª Gray: Not visited
   - Live summary legend.
 - **Automatic Backend Scoring**:
   - Evaluates answers against real database question records on submission.
@@ -97,7 +97,7 @@ A full-stack, enterprise-grade interview preparation platform designed to help s
 
 ---
 
-## 🗄️ Database Architecture
+## ðŸ—„ï¸ Database Architecture
 
 MySQL database: `preptrack_db`
 
@@ -115,7 +115,7 @@ MySQL database: `preptrack_db`
 
 ---
 
-## 🏃 Running the Application Locally
+## ðŸƒ Running the Application Locally
 
 ### Prerequisites
 - **Java 21**
@@ -129,12 +129,23 @@ Create the database:
 ```sql
 CREATE DATABASE preptrack_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
-Configure your credentials in `backend/src/main/resources/application.properties` if different from defaults:
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/preptrack_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-spring.datasource.username=root
-spring.datasource.password=Anish@5671
+
+The real `backend/src/main/resources/application.properties` is local-only and is ignored by Git because it contains database/JWT settings. Copy the safe template to create your local config, then set `DB_USERNAME`, `DB_PASSWORD`, and `JWT_SECRET` in your environment:
+
+```powershell
+Copy-Item backend\src\main\resources\application.example.properties backend\src\main\resources\application.properties
+$env:DB_USERNAME = "root"
+$env:DB_PASSWORD = "your-local-mysql-password"
+$bytes = New-Object byte[] 64
+$rng = [Security.Cryptography.RandomNumberGenerator]::Create()
+$rng.GetBytes($bytes)
+$env:JWT_SECRET = [Convert]::ToBase64String($bytes)
+$rng.Dispose()
 ```
+
+Keep the real values private; each teammate should use their own local database credentials and JWT secret. Never commit `application.properties` or `.env` files.
+
+Connection settings are provided in `backend/src/main/resources/application.example.properties`.
 
 ### 2. Run the Backend (Spring Boot)
 Open a terminal in the `backend/` directory:
@@ -157,7 +168,7 @@ The frontend will start at `http://127.0.0.1:5173/`.
 
 ---
 
-## 🔑 Demo Account Credentials
+## ðŸ”‘ Demo Account Credentials
 - **Username / Email**: `demo` or `demo@preptrack.com`
 - **Password**: `password123`
 *(Or click the "One-Click Login as Demo User" button on the login page)*

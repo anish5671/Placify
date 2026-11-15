@@ -1,0 +1,51 @@
+# Java build output
+**/target/
+**/build/
+**/out/
+*.class
+*.jar
+*.war
+*.ear
+
+# Node.js dependencies and generated output
+**/node_modules/
+**/dist/
+**/.vite/
+**/coverage/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Local environment files and credentials
+.env
+.env.*
+!.env.example
+**/application.properties
+**/application-local.properties
+**/application-secrets.properties
+**/*.local
+*.pem
+*.key
+*.p12
+*.jks
+
+# Local modernization tooling output
+.github/modernize/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.iml
+*.swp
+*.swo
+
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+*.cache
