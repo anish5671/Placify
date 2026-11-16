@@ -11,7 +11,8 @@ import {
   Compass, 
   Flame,
   ChevronRight,
-  Sparkles
+  Sparkles,
+  Swords
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -24,6 +25,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     { name: 'Company Preparation', path: '/companies', icon: Building2 },
     { name: 'Question Bank', path: '/questions', icon: HelpCircle },
     { name: 'DSA Practice', path: '/dsa', icon: Code2 },
+    { name: '1v1 Coding Battle', path: '/battle', icon: Swords },
     { name: 'Mock Test System', path: '/tests', icon: CheckSquare },
     { name: 'Profile & Progress', path: '/profile', icon: User },
   ];

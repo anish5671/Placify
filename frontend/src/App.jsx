@@ -16,6 +16,7 @@ import MockTests from './pages/MockTests';
 import TestExam from './pages/TestExam';
 import TestResult from './pages/TestResult';
 import Profile from './pages/Profile';
+import CodingBattle from './pages/CodingBattle';
 
 export default function App() {
   return (
@@ -40,6 +41,8 @@ export default function App() {
             <Route path="/companies/:id" element={<CompanyDetail />} />
             <Route path="/questions" element={<QuestionBank />} />
             <Route path="/dsa" element={<DsaPractice />} />
+            <Route path="/battle" element={<CodingBattle />} />
+            <Route path="/battle/:code" element={<CodingBattle />} />
             <Route path="/tests" element={<MockTests />} />
             <Route path="/tests/:id/exam" element={<TestExam />} />
             <Route path="/tests/:attemptId/result" element={<TestResult />} />
