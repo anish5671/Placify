@@ -13,6 +13,11 @@ import {
 } from 'lucide-react';
 import api from '../api/client';
 
+const getPracticeUrl = (problem) => (
+  problem.externalLink
+  || `https://leetcode.com/problemset/?search=${encodeURIComponent(problem.title)}`
+);
+
 export default function DsaPractice() {
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -49,6 +54,9 @@ export default function DsaPractice() {
       const res = await api.post(`/questions/${qId}/solve`);
       const isSolved = res.data.data.isSolved;
       setQuestions(prev => prev.map(q => q.id === qId ? { ...q, isSolved } : q));
+      setActiveModalProblem(prev => (
+        prev?.id === qId ? { ...prev, isSolved } : prev
+      ));
     } catch (err) {
       console.error(err);
     }
@@ -193,19 +201,16 @@ export default function DsaPractice() {
 
                     {/* External Link */}
                     <td className="py-4 px-4 text-center">
-                      {p.externalLink ? (
-                        <a
-                          href={p.externalLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 text-indigo-400 border border-slate-800 text-[11px] font-semibold transition-colors"
-                        >
-                          <span>Solve</span>
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
-                      ) : (
-                        <span className="text-slate-600">-</span>
-                      )}
+                      <a
+                        href={getPracticeUrl(p)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 text-indigo-400 border border-slate-800 text-[11px] font-semibold transition-colors"
+                        aria-label={`Solve ${p.title} on LeetCode`}
+                      >
+                        <span>Solve</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
                     </td>
 
                     {/* Actions: View Solution Modal + Bookmark */}
@@ -335,17 +340,15 @@ export default function DsaPractice() {
                 <span>{activeModalProblem.isSolved ? 'Solved' : 'Mark as Solved'}</span>
               </button>
 
-              {activeModalProblem.externalLink && (
-                <a
-                  href={activeModalProblem.externalLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-indigo-600/20 transition-all"
-                >
-                  <span>Practice on LeetCode</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </a>
-              )}
+              <a
+                href={getPracticeUrl(activeModalProblem)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-indigo-600/20 transition-all"
+              >
+                <span>Practice on LeetCode</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
             </div>
           </div>
         </div>
