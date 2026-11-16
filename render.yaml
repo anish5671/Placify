@@ -3,6 +3,7 @@ services:
     name: preptrack-backend
     runtime: docker
     branch: main
+    plan: free
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
     autoDeploy: true
