@@ -20,6 +20,7 @@ public class TestQuestionExamDto {
     private String optionB;
     private String optionC;
     private String optionD;
+    private String hint;
     private int marks;
     private String codeSnippet;
 }

@@ -1,6 +1,7 @@
 package com.preptrack.test;
 
 import com.preptrack.exception.ResourceNotFoundException;
+import com.preptrack.question.QuestionHint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,6 +55,7 @@ public class TestService {
                 .optionB(tq.getQuestion().getOptionB())
                 .optionC(tq.getQuestion().getOptionC())
                 .optionD(tq.getQuestion().getOptionD())
+                .hint(QuestionHint.forQuestion(tq.getQuestion()))
                 .codeSnippet(tq.getQuestion().getCodeSnippet())
                 .marks(tq.getMarks())
                 .build()

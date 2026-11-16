@@ -51,6 +51,8 @@ public class DataInitializer implements CommandLineRunner {
 
         seedMissingDsaQuestions();
         syncDsaMockTest();
+        seedAptitudeAndCoreQuestionBanks();
+        syncAptitudeCoreMockTests();
     }
 
     private void seedDemoUser() {
@@ -738,6 +740,126 @@ public class DataInitializer implements CommandLineRunner {
         dsaTest.setPassingMarks(Math.min(18, dsaTest.getTotalMarks()));
         testRepository.save(dsaTest);
         log.info("DSA mock test is configured with {} DSA questions.", dsaTest.getTotalQuestions());
+    }
+
+    private void seedAptitudeAndCoreQuestionBanks() {
+        Topic aptitudeTopic = topicRepository.findBySlug("quant")
+                .orElseThrow(() -> new IllegalStateException("The quantitative aptitude topic is required for mock question seeding."));
+
+        List<Question> aptitudeQuestions = questionRepository.findByCategoryIgnoreCase("APTITUDE");
+        if (aptitudeQuestions.size() < MockAssessmentCatalog.TARGET_BANK_SIZE) {
+            Set<String> existingTitles = aptitudeQuestions.stream()
+                    .map(Question::getTitle)
+                    .collect(java.util.stream.Collectors.toSet());
+            List<Question> additions = MockAssessmentCatalog.createAptitudeQuestions(
+                            aptitudeTopic, 1, MockAssessmentCatalog.TARGET_BANK_SIZE)
+                    .stream()
+                    .filter(question -> !existingTitles.contains(question.getTitle()))
+                    .limit(MockAssessmentCatalog.TARGET_BANK_SIZE - aptitudeQuestions.size())
+                    .toList();
+            questionRepository.saveAll(additions);
+            log.info("Seeded {} aptitude questions.", additions.size());
+        } else if (aptitudeQuestions.size() > MockAssessmentCatalog.TARGET_BANK_SIZE) {
+            log.warn("Found {} aptitude questions; the requested bank size is {}.",
+                    aptitudeQuestions.size(), MockAssessmentCatalog.TARGET_BANK_SIZE);
+        }
+
+        long coreQuestionCount = MockAssessmentCatalog.CORE_CATEGORIES.stream()
+                .mapToLong(questionRepository::countByCategoryIgnoreCase)
+                .sum();
+        if (coreQuestionCount < MockAssessmentCatalog.TARGET_BANK_SIZE) {
+            Map<String, Topic> coreTopics = Map.of(
+                    "JAVA_OOPS", topicRepository.findBySlug("java-oops")
+                            .orElseThrow(() -> new IllegalStateException("The Java & OOP topic is required for mock question seeding.")),
+                    "DBMS", topicRepository.findBySlug("dbms")
+                            .orElseThrow(() -> new IllegalStateException("The DBMS topic is required for mock question seeding.")),
+                    "OS", topicRepository.findBySlug("os")
+                            .orElseThrow(() -> new IllegalStateException("The operating systems topic is required for mock question seeding.")),
+                    "NETWORKS", topicRepository.findBySlug("networks")
+                            .orElseThrow(() -> new IllegalStateException("The computer networks topic is required for mock question seeding."))
+            );
+            Set<String> existingTitles = MockAssessmentCatalog.CORE_CATEGORIES.stream()
+                    .map(questionRepository::findByCategoryIgnoreCase)
+                    .flatMap(List::stream)
+                    .map(Question::getTitle)
+                    .collect(java.util.stream.Collectors.toSet());
+            List<Question> additions = MockAssessmentCatalog.createCoreQuestions(
+                            coreTopics, 1, MockAssessmentCatalog.TARGET_BANK_SIZE)
+                    .stream()
+                    .filter(question -> !existingTitles.contains(question.getTitle()))
+                    .limit(MockAssessmentCatalog.TARGET_BANK_SIZE - (int) coreQuestionCount)
+                    .toList();
+            questionRepository.saveAll(additions);
+            log.info("Seeded {} CSE core questions.", additions.size());
+        } else if (coreQuestionCount > MockAssessmentCatalog.TARGET_BANK_SIZE) {
+            log.warn("Found {} CSE core questions; the requested bank size is {}.",
+                    coreQuestionCount, MockAssessmentCatalog.TARGET_BANK_SIZE);
+        }
+    }
+
+    private void syncAptitudeCoreMockTests() {
+        List<Question> aptitudeQuestions = questionRepository.findByCategoryIgnoreCase("APTITUDE").stream()
+                .sorted(Comparator.comparing(Question::getId))
+                .toList();
+        List<List<Question>> coreQuestionsByCategory = MockAssessmentCatalog.CORE_CATEGORIES.stream()
+                .map(questionRepository::findByCategoryIgnoreCase)
+                .map(questions -> questions.stream().sorted(Comparator.comparing(Question::getId)).toList())
+                .toList();
+
+        if (aptitudeQuestions.size() < MockAssessmentCatalog.TARGET_BANK_SIZE
+                || coreQuestionsByCategory.stream().mapToInt(List::size).sum() < MockAssessmentCatalog.TARGET_BANK_SIZE) {
+            throw new IllegalStateException("Cannot create the ten Aptitude + CSE mock tests without 100 questions in each bank.");
+        }
+
+        List<Question> coreQuestions = new ArrayList<>(MockAssessmentCatalog.TARGET_BANK_SIZE);
+        for (int questionIndex = 0; coreQuestions.size() < MockAssessmentCatalog.TARGET_BANK_SIZE; questionIndex++) {
+            for (List<Question> categoryQuestions : coreQuestionsByCategory) {
+                if (questionIndex < categoryQuestions.size()) {
+                    coreQuestions.add(categoryQuestions.get(questionIndex));
+                }
+                if (coreQuestions.size() == MockAssessmentCatalog.TARGET_BANK_SIZE) {
+                    break;
+                }
+            }
+        }
+
+        for (int testNumber = 1; testNumber <= MockAssessmentCatalog.MOCK_TEST_COUNT; testNumber++) {
+            String slug = "aptitude-cse-mock-" + testNumber;
+            Test test = testRepository.findBySlug(slug).orElseGet(() -> Test.builder().slug(slug).build());
+            test.setTitle(String.format(Locale.ROOT, "PrepTrack Mock Test %02d", testNumber));
+            test.setDescription("A timed placement assessment with 10 Aptitude and 10 CSE Core questions. Hints are available during the test; solutions are shown after submission.");
+            test.setCompany(null);
+            test.setCategory("PLACEMENT_MOCK");
+            test.setDurationMinutes(30);
+            test.setTotalQuestions(MockAssessmentCatalog.QUESTIONS_PER_TEST);
+            test.setTotalMarks(MockAssessmentCatalog.QUESTIONS_PER_TEST * 2);
+            test.setPassingMarks(24);
+            test.setDifficulty(testNumber <= 3 ? "EASY" : testNumber <= 7 ? "MEDIUM" : "HARD");
+            test.setActive(true);
+            test = testRepository.save(test);
+
+            testQuestionRepository.deleteByTestId(test.getId());
+            List<TestQuestion> testQuestions = new ArrayList<>(MockAssessmentCatalog.QUESTIONS_PER_TEST);
+            int aptitudeStart = (testNumber - 1) * MockAssessmentCatalog.QUESTIONS_PER_SECTION;
+            int coreStart = (testNumber - 1) * MockAssessmentCatalog.QUESTIONS_PER_SECTION;
+            for (int questionIndex = 0; questionIndex < MockAssessmentCatalog.QUESTIONS_PER_SECTION; questionIndex++) {
+                testQuestions.add(TestQuestion.builder()
+                        .test(test)
+                        .question(aptitudeQuestions.get(aptitudeStart + questionIndex))
+                        .questionOrder(questionIndex * 2 + 1)
+                        .marks(2)
+                        .build());
+                testQuestions.add(TestQuestion.builder()
+                        .test(test)
+                        .question(coreQuestions.get(coreStart + questionIndex))
+                        .questionOrder(questionIndex * 2 + 2)
+                        .marks(2)
+                        .build());
+            }
+            testQuestionRepository.saveAll(testQuestions);
+        }
+        log.info("Configured {} placement mock tests with 10 aptitude and 10 CSE core questions each.",
+                MockAssessmentCatalog.MOCK_TEST_COUNT);
     }
 
     private void seedMockTests(Map<String, Company> companies, List<Question> questions) {

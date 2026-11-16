@@ -21,6 +21,7 @@ export default function TestResult() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [filterMode, setFilterMode] = useState('ALL'); // 'ALL', 'CORRECT', 'INCORRECT', 'UNATTEMPTED'
+  const [reviewTabs, setReviewTabs] = useState({});
 
   useEffect(() => {
     fetchResult();
@@ -210,6 +211,7 @@ export default function TestResult() {
         {filteredDetails.map((q) => {
           const isCorrect = q.isCorrect;
           const isUnattempted = q.selectedOption === null;
+          const activeReviewTab = reviewTabs[q.questionId] || 'SOLUTION';
 
           return (
             <div
@@ -253,6 +255,33 @@ export default function TestResult() {
                 </p>
               )}
 
+              <div className="flex gap-2">
+                {[
+                  { id: 'HINT', label: 'Hint' },
+                  { id: 'SOLUTION', label: 'Solution' }
+                ].map(tab => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setReviewTabs(prev => ({ ...prev, [q.questionId]: tab.id }))}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
+                      activeReviewTab === tab.id
+                        ? 'bg-indigo-500/15 text-indigo-300 border-indigo-500/30'
+                        : 'bg-slate-950 text-slate-300 border-slate-800 hover:text-white'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              {activeReviewTab === 'HINT' ? (
+                <div className="p-4 rounded-2xl bg-amber-950/30 border border-amber-500/30 text-xs">
+                  <span className="text-amber-300 font-bold uppercase tracking-wider text-[10px] block mb-1">Hint</span>
+                  <p className="text-slate-200 whitespace-pre-line leading-relaxed">{q.hint}</p>
+                </div>
+              ) : (
+                <>
               {/* Options Breakdown with Highlights */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {['A', 'B', 'C', 'D'].map(opt => {
@@ -304,6 +333,8 @@ export default function TestResult() {
                   {q.explanation}
                 </p>
               </div>
+                </>
+              )}
             </div>
           );
         })}

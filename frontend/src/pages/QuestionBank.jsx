@@ -13,6 +13,8 @@ import {
 } from 'lucide-react';
 import api from '../api/client';
 
+const QUESTIONS_PER_PAGE = 20;
+
 export default function QuestionBank() {
   const [questions, setQuestions] = useState([]);
   const [topics, setTopics] = useState([]);
@@ -24,12 +26,14 @@ export default function QuestionBank() {
   const [company, setCompany] = useState('');
   const [search, setSearch] = useState('');
   const [onlyBookmarked, setOnlyBookmarked] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // User interactive answers state: { [qId]: selectedOption }
   const [userSelected, setUserSelected] = useState({});
-  const [revealedSolutions, setRevealedSolutions] = useState({});
+  const [activeHelpTabs, setActiveHelpTabs] = useState({});
 
   useEffect(() => {
+    setCurrentPage(1);
     fetchTopics();
     fetchQuestions();
   }, [category, difficulty, company]);
@@ -67,12 +71,13 @@ export default function QuestionBank() {
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
+    setCurrentPage(1);
     fetchQuestions();
   };
 
   const handleOptionClick = (questionId, optionLetter) => {
     setUserSelected(prev => ({ ...prev, [questionId]: optionLetter }));
-    setRevealedSolutions(prev => ({ ...prev, [questionId]: true }));
+    setActiveHelpTabs(prev => ({ ...prev, [questionId]: 'SOLUTION' }));
   };
 
   const toggleBookmark = async (qId) => {
@@ -99,6 +104,12 @@ export default function QuestionBank() {
     if (onlyBookmarked && !q.isBookmarked) return false;
     return true;
   });
+  const totalPages = Math.max(1, Math.ceil(filteredQuestions.length / QUESTIONS_PER_PAGE));
+  const activePage = Math.min(currentPage, totalPages);
+  const pageQuestions = filteredQuestions.slice(
+    (activePage - 1) * QUESTIONS_PER_PAGE,
+    activePage * QUESTIONS_PER_PAGE
+  );
 
   return (
     <div className="space-y-6">
@@ -198,6 +209,26 @@ export default function QuestionBank() {
           </button>
         </div>
 
+        {!category && !difficulty && !company && !search && !onlyBookmarked && !loading && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20">
+              <p className="text-[10px] uppercase tracking-wider font-bold text-indigo-300">Aptitude Question Bank</p>
+              <p className="text-2xl font-black text-white mt-1">
+                {questions.filter(question => question.category === 'APTITUDE').length}
+                <span className="text-sm font-semibold text-slate-400 ml-2">questions</span>
+              </p>
+            </div>
+            <div className="p-4 rounded-2xl bg-cyan-500/10 border border-cyan-500/20">
+              <p className="text-[10px] uppercase tracking-wider font-bold text-cyan-300">CSE Core Question Bank</p>
+              <p className="text-2xl font-black text-white mt-1">
+                {questions.filter(question => ['JAVA_OOPS', 'DBMS', 'OS', 'NETWORKS'].includes(question.category)).length}
+                <span className="text-sm font-semibold text-slate-400 ml-2">questions</span>
+              </p>
+              <p className="text-[10px] text-slate-400 mt-1">Java/OOP, DBMS/SQL, Operating Systems, Networks</p>
+            </div>
+          </div>
+        )}
+
         <div className="text-xs text-slate-400 font-medium">
           Showing <span className="text-white font-bold">{filteredQuestions.length}</span> Questions
         </div>
@@ -217,9 +248,10 @@ export default function QuestionBank() {
         </div>
       ) : (
         <div className="space-y-4">
-          {filteredQuestions.map((q, idx) => {
+          {pageQuestions.map((q, idx) => {
             const hasChosen = userSelected[q.id];
-            const isRevealed = revealedSolutions[q.id];
+            const activeHelpTab = activeHelpTabs[q.id];
+            const isRevealed = activeHelpTab === 'SOLUTION';
             const isCorrectChoice = hasChosen && hasChosen === q.correctOption;
 
             return (
@@ -231,7 +263,7 @@ export default function QuestionBank() {
                 <div className="flex items-start justify-between gap-4">
                   <div className="space-y-1.5 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-xs font-black text-indigo-400">#{idx + 1}</span>
+                      <span className="text-xs font-black text-indigo-400">#{(activePage - 1) * QUESTIONS_PER_PAGE + idx + 1}</span>
                       <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider ${
                         q.difficulty === 'HARD' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' :
                         q.difficulty === 'MEDIUM' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
@@ -352,10 +384,30 @@ export default function QuestionBank() {
 
                   <div className="flex items-center gap-3">
                     <button
-                      onClick={() => setRevealedSolutions(prev => ({ ...prev, [q.id]: !prev[q.id] }))}
-                      className="text-xs font-bold text-indigo-400 hover:text-indigo-300 transition-colors"
+                      onClick={() => setActiveHelpTabs(prev => ({
+                        ...prev,
+                        [q.id]: prev[q.id] === 'HINT' ? null : 'HINT'
+                      }))}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
+                        activeHelpTab === 'HINT'
+                          ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+                          : 'bg-slate-950 text-slate-300 border-slate-800 hover:text-white'
+                      }`}
                     >
-                      {isRevealed ? 'Hide Explanation' : 'View Correct Answer & Explanation'}
+                      Hint
+                    </button>
+                    <button
+                      onClick={() => setActiveHelpTabs(prev => ({
+                        ...prev,
+                        [q.id]: prev[q.id] === 'SOLUTION' ? null : 'SOLUTION'
+                      }))}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
+                        isRevealed
+                          ? 'bg-indigo-500/15 text-indigo-300 border-indigo-500/30'
+                          : 'bg-slate-950 text-slate-300 border-slate-800 hover:text-white'
+                      }`}
+                    >
+                      Solution
                     </button>
 
                     {q.externalLink && (
@@ -373,6 +425,15 @@ export default function QuestionBank() {
                 </div>
 
                 {/* Revealed Explanation Box */}
+                {activeHelpTab === 'HINT' && (
+                  <div className="p-4 rounded-2xl bg-amber-950/30 border border-amber-500/30 text-xs">
+                    <span className="text-amber-300 font-extrabold uppercase tracking-wider text-[10px] block mb-1">
+                      Hint
+                    </span>
+                    <p className="text-slate-200 leading-relaxed">{q.hint}</p>
+                  </div>
+                )}
+
                 {isRevealed && (
                   <div className="p-4 rounded-2xl bg-slate-950 border border-indigo-500/30 text-xs space-y-2 animate-fadeIn">
                     <div className="flex items-center gap-2">
@@ -393,6 +454,34 @@ export default function QuestionBank() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {!loading && filteredQuestions.length > 0 && (
+        <div className="flex items-center justify-between gap-3 p-4 rounded-2xl bg-slate-900/80 border border-slate-800">
+          <p className="text-xs text-slate-400">
+            Page <span className="font-bold text-white">{activePage}</span> of{' '}
+            <span className="font-bold text-white">{totalPages}</span>
+            <span className="ml-2">({filteredQuestions.length} questions)</span>
+          </p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setCurrentPage(activePage - 1)}
+              disabled={activePage === 1}
+              className="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-200 bg-slate-950 border border-slate-800 disabled:opacity-40 disabled:pointer-events-none"
+            >
+              Previous
+            </button>
+            <button
+              type="button"
+              onClick={() => setCurrentPage(activePage + 1)}
+              disabled={activePage === totalPages}
+              className="px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:pointer-events-none"
+            >
+              Next
+            </button>
+          </div>
         </div>
       )}
     </div>

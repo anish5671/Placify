@@ -31,6 +31,7 @@ export default function TestExam() {
   const [markedForReview, setMarkedForReview] = useState({});
   // visited: { [qId]: boolean }
   const [visited, setVisited] = useState({});
+  const [visibleHints, setVisibleHints] = useState({});
 
   // Timer in seconds
   const [timeLeft, setTimeLeft] = useState(1800); // 30 mins default
@@ -38,6 +39,9 @@ export default function TestExam() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const startTimeRef = useRef(Date.now());
+  const answersRef = useRef({});
+  const markedForReviewRef = useRef({});
+  const isSubmittingRef = useRef(false);
 
   useEffect(() => {
     fetchTest();
@@ -50,11 +54,21 @@ export default function TestExam() {
       if (res.data.success && res.data.data) {
         const data = res.data.data;
         setTestData(data);
+        startTimeRef.current = Date.now();
+        answersRef.current = {};
+        markedForReviewRef.current = {};
+        isSubmittingRef.current = false;
+        setCurrentIndex(0);
+        setAnswers({});
+        setMarkedForReview({});
+        setVisibleHints({});
         const durationSec = (data.durationMinutes || 30) * 60;
         setTimeLeft(durationSec);
         // Mark first question as visited
         if (data.questions && data.questions.length > 0) {
           setVisited({ [data.questions[0].questionId]: true });
+        } else {
+          setVisited({});
         }
       }
     } catch (err) {
@@ -87,19 +101,22 @@ export default function TestExam() {
   };
 
   const handleSelectOption = (qId, option) => {
-    setAnswers(prev => ({ ...prev, [qId]: option }));
+    const updatedAnswers = { ...answersRef.current, [qId]: option };
+    answersRef.current = updatedAnswers;
+    setAnswers(updatedAnswers);
   };
 
   const handleClearOption = (qId) => {
-    setAnswers(prev => {
-      const copy = { ...prev };
-      delete copy[qId];
-      return copy;
-    });
+    const updatedAnswers = { ...answersRef.current };
+    delete updatedAnswers[qId];
+    answersRef.current = updatedAnswers;
+    setAnswers(updatedAnswers);
   };
 
   const handleToggleReview = (qId) => {
-    setMarkedForReview(prev => ({ ...prev, [qId]: !prev[qId] }));
+    const updatedMarked = { ...markedForReviewRef.current, [qId]: !markedForReviewRef.current[qId] };
+    markedForReviewRef.current = updatedMarked;
+    setMarkedForReview(updatedMarked);
   };
 
   const goToQuestion = (index) => {
@@ -112,7 +129,8 @@ export default function TestExam() {
   };
 
   const submitExam = async () => {
-    if (isSubmitting || !testData) return;
+    if (isSubmittingRef.current || !testData) return;
+    isSubmittingRef.current = true;
     setIsSubmitting(true);
     setShowConfirmModal(false);
 
@@ -121,8 +139,8 @@ export default function TestExam() {
       
       const payloadAnswers = testData.questions.map(q => ({
         questionId: q.questionId,
-        selectedOption: answers[q.questionId] || null,
-        isMarkedForReview: !!markedForReview[q.questionId],
+        selectedOption: answersRef.current[q.questionId] || null,
+        isMarkedForReview: !!markedForReviewRef.current[q.questionId],
       }));
 
       const res = await api.post(`/tests/${testData.testId}/submit`, {
@@ -137,6 +155,7 @@ export default function TestExam() {
     } catch (err) {
       console.error('Submission failed', err);
       alert('Failed to submit test. Please check network connection.');
+      isSubmittingRef.current = false;
       setIsSubmitting(false);
     }
   };
@@ -254,6 +273,24 @@ export default function TestExam() {
                   </pre>
                 )}
               </div>
+
+              {currentQ.hint && (
+                <div className="pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setVisibleHints(prev => ({ ...prev, [qId]: !prev[qId] }))}
+                    className="px-3.5 py-2 rounded-xl text-xs font-bold text-amber-300 bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/15 transition-colors"
+                  >
+                    {visibleHints[qId] ? 'Hide Hint' : 'Show Hint'}
+                  </button>
+                  {visibleHints[qId] && (
+                    <div className="mt-3 p-4 rounded-2xl bg-amber-950/30 border border-amber-500/30 text-xs text-slate-200 leading-relaxed">
+                      <span className="text-amber-300 font-extrabold uppercase tracking-wider text-[10px] block mb-1">Hint</span>
+                      {currentQ.hint}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Options Selection */}
               <div className="space-y-2.5 pt-4">

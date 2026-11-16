@@ -1,136 +1,72 @@
-﻿# PrepTrack â€“ Interview Preparation Platform
+# PrepTrack - Interview Preparation Platform
 
-A full-stack, enterprise-grade interview preparation platform designed to help students and software engineers prepare for technical placements, campus recruitment, and product company interviews (TCS, Infosys, Wipro, Accenture, Amazon, Google, Microsoft, and Cognizant).
+PrepTrack is a full-stack web application that helps students and software engineers prepare for technical interviews, campus placements, and company assessments.
 
----
+## Technology Stack
 
-## ðŸ› ï¸ Technology Stack
+### Frontend
+- React 18
+- Vite
+- Tailwind CSS
+- React Router
+- Axios
+- Lucide React
 
-### **Frontend**
-- **React.js 18** with Modern Hooks & Functional Components
-- **Vite** for ultra-fast bundling and HMR
-- **Tailwind CSS 3** with modern dark-slate SaaS design system
-- **React Router 6** for client-side routing & protected routes
-- **Axios** with request/response interceptors and JWT authorization headers
-- **Lucide React** for high-clarity iconography
+### Backend
+- Java 21
+- Spring Boot 3.5
+- Spring Security with JWT authentication
+- Spring Data JPA and Hibernate
+- MySQL 8
+- Maven
+- Lombok
 
-### **Backend**
-- **Java 21**
-- **Spring Boot 3.5.3**
-- **Spring Security 6** with Stateless JWT Authentication & BCrypt password hashing
-- **Spring Data JPA & Hibernate**
-- **MySQL 8** relational database with indexes and schema relationships
-- **Maven**
-- **Lombok**
+## Features
 
----
+### Authentication
+- Register and sign in with validated account details.
+- Use stateless JWT authentication and BCrypt password hashing.
+- Try the demo account from the login page.
 
-## ðŸš€ Key Modules & Features
+### Dashboard
+- View question-solving progress, mock-test results, and preparation statistics.
+- Review topic progress and recent test attempts.
 
-### 1. Authentication & Security
-- User registration and login with input validation.
-- Stateless JWT-based authentication with expiration handling.
-- Secure password hashing using BCrypt (`BCryptPasswordEncoder`).
-- Client-side protected route wrappers and Axios authorization interceptors.
-- Demo one-click login button for fast testing.
+### Company Preparation
+- Explore preparation information for TCS, Amazon, Infosys, Accenture, Google, Microsoft, Wipro, and Cognizant.
+- Review hiring stages, exam patterns, eligibility details, and company-related questions.
 
-### 2. Candidate Dashboard
-- **Total Questions Solved**: live progress bar tracking solved vs total questions.
-- **Tests Attempted**: counter of completed mock assessments.
-- **Average Test Score**: real-time accuracy and score tracking across all attempts.
-- **Overall Preparation Readiness %**: calculated based on test performance and question mastery.
-- **Topic-Wise Mastery Cards**: visual completion bars for Quant, Reasoning, Verbal, Java, DBMS, OS, Networks, and DSA.
-- **Recent Test History Table**: past mock attempts with score, accuracy %, time taken, status, and direct links to full question analysis.
+### Question Bank
+- Browse aptitude, reasoning, verbal ability, Java, DBMS, SQL, operating systems, networking, and DSA questions.
+- Practice a 100-question Aptitude bank and a 100-question CSE Core bank covering Java/OOP, DBMS/SQL, operating systems, and networks.
+- Search and filter questions by category, difficulty, and company.
+- Use per-question hint and solution tabs, bookmark questions, and mark questions as solved.
 
-### 3. Company Preparation Hub
-- Curated prep for **TCS, Amazon, Infosys, Accenture, Google, Microsoft, Wipro, and Cognizant**.
-- **Interactive Recruitment Roadmap**: visual stage-by-stage hiring flowchart (Online Assessment -> Technical Interview -> Managerial/HR).
-- **Exam Pattern & Syllabus Breakdown**: specific syllabus and time limits for each company.
-- **Package & Roles**: CTC ranges (e.g. TCS Ninja/Digital/Prime, Amazon SDE-1) and eligibility criteria.
-- **Company-Specific Question Bank**: filterable by Aptitude, Technical CS, and DSA with instant practice mode.
-- **Company Mock Tests**: direct access to company-tailored tests.
+### DSA Practice
+- Browse a bank of 150 DSA practice questions across easy, medium, and hard difficulty levels.
+- Review each problem statement and its suggested approach.
+- Open each problem directly on LeetCode when a direct link is available. Otherwise, search for it in LeetCode's problem list.
+- Track solved problems and bookmarks.
 
-### 4. Comprehensive Question Bank
-- Core subjects covered:
-  - Quantitative Aptitude & Logical Reasoning
-  - Verbal Ability & English Comprehension
-  - Java & Object-Oriented Programming (OOP)
-  - Database Management Systems (DBMS) & Normalization
-  - SQL Queries (Joins, Aggregations, Subqueries)
-  - Operating Systems (Deadlocks, Scheduling, Virtual Memory)
-  - Computer Networks (OSI, TCP 3-Way Handshake, HTTP/S)
-  - Data Structures and Algorithms (DSA)
-- **Interactive Practice Mode**: click options to immediately check if your choice is correct (green) or wrong (red), with full conceptual explanation revealed.
-- **Bookmarks**: save questions to your personal revision list with instant database persistence.
-- **Mark as Solved**: toggle question completion status.
-- Search and multi-criteria filters (Category, Difficulty, Company tags).
+### Mock Tests
+- Take timed company, core computer science, and DSA assessments.
+- Take 10 distinct placement mocks, each with 10 Aptitude and 10 CSE Core questions and a 30-minute time limit. Questions do not repeat across these 10 tests.
+- Open hints during a placement mock and review correct answers and solutions after submitting.
+- Review scores, answers, and explanations after submission.
+- The DSA mock test contains 15 questions selected from the DSA practice bank.
 
-### 5. DSA Practice Sheets
-- Includes 150 coding-practice problems across common interview topics, seeded into the database on startup.
-- The DSA mock test samples 15 questions from the DSA practice bank.
-- Topic coverage: Arrays, Strings, Binary Search, Linked Lists, Trees, Graphs, Greedy, and Dynamic Programming.
-- Difficulty levels: Easy, Medium, Hard.
-- Company tags for every problem.
-- **Optimal Approach Modal**: problem statement, constraints, example input/output, Java solution code snippet, and time/space complexity analysis.
-- Direct external links to LeetCode practice problems.
+### Candidate Profile
+- Manage profile details, review test history, and access bookmarked questions.
 
-### 6. Mock Test & Assessment System
-- Timed MCQ tests with live countdown timer and auto-submission when time expires.
-- **Anti-Cheat Answer Protection**: correct answers and explanations are **never** sent to the client during an exam.
-- **Exam Workspace**:
-  - Split layout with active question, options, and actions (Previous, Next, Clear Response, Mark for Review).
-  - **Interactive Question Palette**: color-coded exam dots matching national testing standards:
-    - ðŸŸ¢ Green: Answered
-    - ðŸŸ¡ Yellow: Marked for Review
-    - ðŸ”µ Blue: Answered & Marked for Review
-    - âšª Gray: Not visited
-  - Live summary legend.
-- **Automatic Backend Scoring**:
-  - Evaluates answers against real database question records on submission.
-  - Generates detailed score report: Total Score, Percentage, Correct count, Incorrect count, Unattempted count, Time taken, and Pass/Fail status.
-  - **Comprehensive Question-by-Question Review**: review each question with your chosen answer vs the correct answer, accompanied by in-depth step-by-step conceptual explanations.
+## Database
 
-### 7. Candidate Profile & Progress
-- Candidate Profile: target company, target role, graduation year, and edit capability.
-- Test attempt history archive with review result links.
-- Personal bookmarked questions list.
+PrepTrack uses a MySQL database named `preptrack_db`. Create it before starting the backend:
 
----
-
-## ðŸ—„ï¸ Database Architecture
-
-MySQL database: `preptrack_db`
-
-### Tables & Relationships:
-1. `users`: Stores candidate credentials, target company, target role, and graduation year.
-2. `companies`: Company profile, logo, hiring roadmap, eligibility, and syllabus.
-3. `topics`: Core preparation domains (Aptitude, Java, DBMS, OS, Networks, DSA).
-4. `questions`: Questions with 4 options, correct answer, explanation, difficulty, and company tags.
-5. `tests`: Mock assessments with duration, total marks, and passing criteria.
-6. `test_questions`: Mapping of tests to questions with order and marks.
-7. `test_attempts`: User test submissions with score, percentage, counts, and time taken.
-8. `user_answers`: Individual question answers per attempt with `isCorrect` and `selectedOption`.
-9. `bookmarks`: User's bookmarked questions.
-10. `user_progress`: User's solved question status and timestamp.
-
----
-
-## ðŸƒ Running the Application Locally
-
-### Prerequisites
-- **Java 21**
-- **Apache Maven 3.9+**
-- **Node.js 18+** and **npm**
-- **MySQL Server 8.0**
-
-### 1. Database Configuration
-Ensure MySQL 8 is running on port 3306.
-Create the database:
 ```sql
 CREATE DATABASE preptrack_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-The real `backend/src/main/resources/application.properties` is local-only and is ignored by Git because it contains database/JWT settings. Copy the safe template to create your local config, then set `DB_USERNAME`, `DB_PASSWORD`, and `JWT_SECRET` in your environment:
+The local `backend/src/main/resources/application.properties` file is ignored by Git because it can contain credentials. Create it from the safe example:
 
 ```powershell
 Copy-Item backend\src\main\resources\application.example.properties backend\src\main\resources\application.properties
@@ -143,32 +79,76 @@ $env:JWT_SECRET = [Convert]::ToBase64String($bytes)
 $rng.Dispose()
 ```
 
-Keep the real values private; each teammate should use their own local database credentials and JWT secret. Never commit `application.properties` or `.env` files.
+Keep your database password and JWT secret private. Each developer should use their own local values. Do not commit `application.properties` or `.env` files.
 
-Connection settings are provided in `backend/src/main/resources/application.example.properties`.
+## Run Everything with Docker Compose
 
-### 2. Run the Backend (Spring Boot)
-Open a terminal in the `backend/` directory:
-```bash
-mvn clean compile
+Docker Compose starts MySQL, the Spring Boot backend, and the Vite frontend together. It creates a separate local database for each developer's computer; it does not connect to another developer's MySQL database.
+
+Requirements: Docker Desktop (Windows/macOS) or Docker Engine with the Docker Compose plugin.
+
+From the project root in PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Edit `.env` and replace both placeholder values. `MYSQL_ROOT_PASSWORD` is the local MySQL password. `JWT_SECRET` must be a Base64-encoded random key containing at least 32 bytes. For example, generate one in PowerShell:
+
+```powershell
+$bytes = New-Object byte[] 64
+$rng = [Security.Cryptography.RandomNumberGenerator]::Create()
+$rng.GetBytes($bytes)
+[Convert]::ToBase64String($bytes)
+$rng.Dispose()
+```
+
+Copy the printed key into `.env` as the value of `JWT_SECRET`, then start the application:
+
+```powershell
+docker compose up --build
+```
+
+Open `http://localhost:5173`. The backend is available at `http://localhost:8080`. MySQL is only reachable by the Compose services, not exposed on a host port. The named database volume preserves local data when containers stop or are rebuilt. Stop the services with `Ctrl+C`, or run `docker compose down` in another terminal. **Do not use `docker compose down -v` unless you intend to delete the local database and all its data.**
+
+The database seeds the question bank and mock tests when the backend starts. A first run builds the images and downloads dependencies, so it may take a few minutes.
+
+## Requirements
+
+- Docker Desktop or Docker Engine with the Docker Compose plugin (for the all-in-one setup)
+- Java 21
+- Apache Maven 3.9 or later
+- Node.js 18 or later and npm
+- MySQL Server 8
+
+## Run the Application
+
+### Start the Backend
+
+In a PowerShell terminal:
+
+```powershell
+cd backend
 mvn spring-boot:run
 ```
-The backend will automatically:
-- Connect to MySQL and create/update all 10 schema tables.
-- Seed the demo user, 8 companies, 9 topics, 150 DSA practice questions plus other questions, and 5 mock tests.
-- Listen on `http://localhost:8080`.
 
-### 3. Run the Frontend (React + Vite)
-Open a new terminal in the `frontend/` directory:
-```bash
+The backend runs at `http://localhost:8080`. On startup, it creates or updates the database tables and adds any missing seed data.
+
+### Start the Frontend
+
+Open a second terminal:
+
+```powershell
+cd frontend
 npm install
 npm run dev
 ```
-The frontend will start at `http://127.0.0.1:5173/`.
 
----
+Open the local address printed by Vite, usually `http://localhost:5173`.
 
-## ðŸ”‘ Demo Account Credentials
-- **Username / Email**: `demo` or `demo@preptrack.com`
-- **Password**: `password123`
-*(Or click the "One-Click Login as Demo User" button on the login page)*
+## Demo Account
+
+- Username or email: `demo` or `demo@preptrack.com`
+- Password: `password123`
+
+You can also use the demo sign-in option on the login page.

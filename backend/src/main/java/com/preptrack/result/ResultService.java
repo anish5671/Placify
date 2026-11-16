@@ -4,6 +4,7 @@ import com.preptrack.exception.ResourceNotFoundException;
 import com.preptrack.progress.UserProgress;
 import com.preptrack.progress.UserProgressRepository;
 import com.preptrack.question.Question;
+import com.preptrack.question.QuestionHint;
 import com.preptrack.test.Test;
 import com.preptrack.test.TestQuestion;
 import com.preptrack.test.TestQuestionRepository;
@@ -117,6 +118,7 @@ public class ResultService {
                     .correctOption(q.getCorrectOption())
                     .isCorrect(isCorrect)
                     .explanation(q.getExplanation())
+                    .hint(QuestionHint.forQuestion(q))
                     .marksObtained(marksObtained)
                     .maxMarks(marks)
                     .isMarkedForReview(markedForReview)
@@ -192,6 +194,7 @@ public class ResultService {
                     .correctOption(q.getCorrectOption())
                     .isCorrect(ua.isCorrect())
                     .explanation(q.getExplanation())
+                    .hint(QuestionHint.forQuestion(q))
                     .marksObtained(ua.getMarksObtained())
                     .maxMarks(maxMarks)
                     .isMarkedForReview(ua.isMarkedForReview())

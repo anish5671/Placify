@@ -57,10 +57,10 @@ export default function MockTests() {
         <div>
           <h2 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
             <CheckSquare className="w-6 h-6 text-indigo-400" />
-            <span>Mock Test Assessment System</span>
+            <span>Mock Test Arena</span>
           </h2>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Simulated company online assessments with live countdown timers, question palettes, and backend scoring
+            Build test-day confidence with timed placement, company, and DSA assessments
           </p>
         </div>
 
@@ -68,6 +68,7 @@ export default function MockTests() {
         <div className="flex flex-wrap items-center gap-2">
           {[
             { id: 'ALL', name: 'All Tests' },
+            { id: 'PLACEMENT_MOCK', name: 'Aptitude + CSE' },
             { id: 'COMPANY_MOCK', name: 'Company Mocks' },
             { id: 'TECHNICAL_CS', name: 'Core CS Sprint' },
             { id: 'DSA', name: 'DSA Challenge' }
@@ -84,6 +85,36 @@ export default function MockTests() {
               {cat.name}
             </button>
           ))}
+        </div>
+      </div>
+
+      <div className="relative overflow-hidden p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-indigo-950 via-slate-900 to-cyan-950 border border-indigo-500/25 shadow-xl">
+        <div className="absolute -right-12 -top-16 w-56 h-56 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
+        <div className="relative grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-6 items-center">
+          <div className="max-w-2xl">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-500/15 border border-indigo-400/20 text-indigo-200 text-[10px] font-black uppercase tracking-wider">
+              <Target className="w-3.5 h-3.5" />
+              10-Test Placement Series
+            </span>
+            <h3 className="text-xl sm:text-2xl font-black text-white mt-3">
+              Aptitude and CSE Core, balanced in every test.
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed">
+              Each mock has a fresh set of questions, a live timer, in-test hints, and detailed solutions after submission.
+            </p>
+          </div>
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+            {[
+              { value: '20', label: 'Questions' },
+              { value: '10 + 10', label: 'Aptitude + Core' },
+              { value: '30 min', label: 'Time limit' }
+            ].map(stat => (
+              <div key={stat.label} className="min-w-[88px] p-3 rounded-2xl bg-slate-950/60 border border-slate-700/70 text-center">
+                <p className="text-base sm:text-lg font-black text-white">{stat.value}</p>
+                <p className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-wide mt-1">{stat.label}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -104,7 +135,7 @@ export default function MockTests() {
                 {/* Header Badge */}
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                    {test.category}
+                    {test.category === 'PLACEMENT_MOCK' ? 'APTITUDE + CSE CORE' : test.category.replaceAll('_', ' ')}
                   </span>
                   <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded ${
                     test.difficulty === 'HARD' ? 'bg-rose-500/10 text-rose-400' :
@@ -123,6 +154,16 @@ export default function MockTests() {
                   <p className="text-xs text-slate-300 mt-1.5 line-clamp-2 leading-relaxed">
                     {test.description}
                   </p>
+                  {test.category === 'PLACEMENT_MOCK' && (
+                    <div className="flex items-center gap-2 pt-1">
+                      <span className="px-2 py-1 rounded-lg bg-indigo-500/10 text-indigo-300 text-[10px] font-bold border border-indigo-500/20">
+                        10 Aptitude
+                      </span>
+                      <span className="px-2 py-1 rounded-lg bg-cyan-500/10 text-cyan-300 text-[10px] font-bold border border-cyan-500/20">
+                        10 CSE Core
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Company Tag if any */}
@@ -208,7 +249,7 @@ export default function MockTests() {
                   <li>Use the Question Palette on the right to jump directly to any question.</li>
                   <li>You can mark questions for review and return to them anytime before submission.</li>
                   <li>Each correct answer earns 2 marks. There is no negative marking.</li>
-                  <li>Correct answers and detailed explanations are calculated by the backend and revealed only after test submission.</li>
+                  <li>You can open a hint while answering. Correct answers and full solutions are revealed only after submission.</li>
                 </ul>
               </div>
             </div>

@@ -22,6 +22,7 @@ public class QuestionResultDetailDto {
     private String correctOption;
     private boolean isCorrect;
     private String explanation;
+    private String hint;
     private int marksObtained;
     private int maxMarks;
     private boolean isMarkedForReview;

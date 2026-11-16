@@ -61,6 +61,9 @@ public class Question {
     @Column(columnDefinition = "LONGTEXT")
     private String explanation;
 
+    @Column(columnDefinition = "TEXT")
+    private String hint;
+
     @Column(name = "company_tags", length = 255)
     private String companyTags; // e.g., "TCS,Infosys,Amazon"
 

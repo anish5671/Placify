@@ -26,6 +26,7 @@ public class QuestionDto {
     private String optionD;
     private String correctOption;
     private String explanation;
+    private String hint;
     private String companyTags;
     private String externalLink;
     private String codeSnippet;
@@ -52,6 +53,7 @@ public class QuestionDto {
                 .optionD(q.getOptionD())
                 .correctOption(q.getCorrectOption())
                 .explanation(q.getExplanation())
+                .hint(QuestionHint.forQuestion(q))
                 .companyTags(q.getCompanyTags())
                 .externalLink(q.getExternalLink())
                 .codeSnippet(q.getCodeSnippet())
