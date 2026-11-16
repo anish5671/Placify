@@ -14,6 +14,22 @@ import {
 import api from '../api/client';
 
 const QUESTIONS_PER_PAGE = 20;
+const QUESTIONS_PER_BANK = 30;
+const CORE_CATEGORIES = ['JAVA_OOPS', 'DBMS', 'OS', 'NETWORKS'];
+const QUESTION_BANKS = [
+  ...Array.from({ length: 10 }, (_, index) => ({
+    id: `aptitude-${index + 1}`,
+    title: `Aptitude Set ${String(index + 1).padStart(2, '0')}`,
+    section: 'APTITUDE',
+    index,
+  })),
+  ...Array.from({ length: 5 }, (_, index) => ({
+    id: `core-${index + 1}`,
+    title: `CSE Core Set ${String(index + 1).padStart(2, '0')}`,
+    section: 'CSE_CORE',
+    index,
+  })),
+];
 
 export default function QuestionBank() {
   const [questions, setQuestions] = useState([]);
@@ -26,6 +42,8 @@ export default function QuestionBank() {
   const [company, setCompany] = useState('');
   const [search, setSearch] = useState('');
   const [onlyBookmarked, setOnlyBookmarked] = useState(false);
+  const [selectedBankId, setSelectedBankId] = useState('');
+  const [loadError, setLoadError] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
   // User interactive answers state: { [qId]: selectedOption }
@@ -45,7 +63,7 @@ export default function QuestionBank() {
         setTopics(res.data.data);
       }
     } catch (err) {
-      console.error(err);
+      console.error('Failed to load question topics', err);
     }
   };
 
@@ -61,9 +79,15 @@ export default function QuestionBank() {
       const res = await api.get('/questions', { params });
       if (res.data.success) {
         setQuestions(res.data.data);
+        setLoadError('');
+      } else {
+        setQuestions([]);
+        setLoadError('The question service returned an unsuccessful response.');
       }
     } catch (err) {
-      console.error(err);
+      console.error('Failed to load questions', err);
+      setQuestions([]);
+      setLoadError(err.response?.data?.message || 'Unable to load questions. Check that the backend is running, then try again.');
     } finally {
       setLoading(false);
     }
@@ -72,6 +96,7 @@ export default function QuestionBank() {
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setCurrentPage(1);
+    setSelectedBankId('');
     fetchQuestions();
   };
 
@@ -100,7 +125,31 @@ export default function QuestionBank() {
     }
   };
 
-  const filteredQuestions = questions.filter(q => {
+  const aptitudeQuestions = questions
+    .filter(question => question.category === 'APTITUDE')
+    .sort((first, second) => first.id - second.id);
+  const coreGroups = CORE_CATEGORIES.map(coreCategory => questions
+    .filter(question => question.category === coreCategory)
+    .sort((first, second) => first.id - second.id));
+  const coreQuestions = [];
+  for (let index = 0; coreGroups.some(group => index < group.length); index += 1) {
+    coreGroups.forEach(group => {
+      if (group[index]) coreQuestions.push(group[index]);
+    });
+  }
+  const questionBanks = QUESTION_BANKS.map(bank => {
+    const bankQuestions = bank.section === 'APTITUDE' ? aptitudeQuestions : coreQuestions;
+    return {
+      ...bank,
+      questions: bankQuestions.slice(
+        bank.index * QUESTIONS_PER_BANK,
+        (bank.index + 1) * QUESTIONS_PER_BANK
+      ),
+    };
+  });
+  const selectedBank = questionBanks.find(bank => bank.id === selectedBankId);
+  const questionsInView = selectedBank ? selectedBank.questions : questions;
+  const filteredQuestions = questionsInView.filter(q => {
     if (onlyBookmarked && !q.isBookmarked) return false;
     return true;
   });
@@ -152,7 +201,10 @@ export default function QuestionBank() {
           {/* Category Dropdown */}
           <select
             value={category}
-            onChange={(e) => setCategory(e.target.value)}
+            onChange={(e) => {
+              setSelectedBankId('');
+              setCategory(e.target.value);
+            }}
             className="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs font-semibold text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
           >
             <option value="">All Categories</option>
@@ -169,7 +221,10 @@ export default function QuestionBank() {
           {/* Difficulty Dropdown */}
           <select
             value={difficulty}
-            onChange={(e) => setDifficulty(e.target.value)}
+            onChange={(e) => {
+              setSelectedBankId('');
+              setDifficulty(e.target.value);
+            }}
             className="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs font-semibold text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
           >
             <option value="">All Difficulties</option>
@@ -181,7 +236,10 @@ export default function QuestionBank() {
           {/* Company Tag Filter */}
           <select
             value={company}
-            onChange={(e) => setCompany(e.target.value)}
+            onChange={(e) => {
+              setSelectedBankId('');
+              setCompany(e.target.value);
+            }}
             className="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs font-semibold text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
           >
             <option value="">All Companies</option>
@@ -197,7 +255,10 @@ export default function QuestionBank() {
 
           {/* Bookmarks Toggle */}
           <button
-            onClick={() => setOnlyBookmarked(!onlyBookmarked)}
+            onClick={() => {
+              setSelectedBankId('');
+              setOnlyBookmarked(!onlyBookmarked);
+            }}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
               onlyBookmarked
                 ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
@@ -209,30 +270,89 @@ export default function QuestionBank() {
           </button>
         </div>
 
-        {!category && !difficulty && !company && !search && !onlyBookmarked && !loading && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20">
-              <p className="text-[10px] uppercase tracking-wider font-bold text-indigo-300">Aptitude Question Bank</p>
-              <p className="text-2xl font-black text-white mt-1">
-                {questions.filter(question => question.category === 'APTITUDE').length}
-                <span className="text-sm font-semibold text-slate-400 ml-2">questions</span>
-              </p>
-            </div>
-            <div className="p-4 rounded-2xl bg-cyan-500/10 border border-cyan-500/20">
-              <p className="text-[10px] uppercase tracking-wider font-bold text-cyan-300">CSE Core Question Bank</p>
-              <p className="text-2xl font-black text-white mt-1">
-                {questions.filter(question => ['JAVA_OOPS', 'DBMS', 'OS', 'NETWORKS'].includes(question.category)).length}
-                <span className="text-sm font-semibold text-slate-400 ml-2">questions</span>
-              </p>
-              <p className="text-[10px] text-slate-400 mt-1">Java/OOP, DBMS/SQL, Operating Systems, Networks</p>
-            </div>
-          </div>
-        )}
-
         <div className="text-xs text-slate-400 font-medium">
           Showing <span className="text-white font-bold">{filteredQuestions.length}</span> Questions
         </div>
       </div>
+
+      {!category && !difficulty && !company && !search && !onlyBookmarked && !loading && !loadError && (
+        <section className="space-y-4">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h3 className="text-lg font-black text-white flex items-center gap-2">
+                <Layers className="w-5 h-5 text-indigo-400" />
+                15 Placement Question Banks
+              </h3>
+              <p className="text-xs text-slate-400 mt-1">
+                10 Aptitude sets + 5 CSE Core sets, 30 important practice questions in each.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 text-[11px] font-bold">
+              <span className="px-3 py-1.5 rounded-lg bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+                Aptitude: {aptitudeQuestions.length}
+              </span>
+              <span className="px-3 py-1.5 rounded-lg bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+                CSE Core: {coreQuestions.length}
+              </span>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {questionBanks.map(bank => {
+              const isSelected = selectedBankId === bank.id;
+              const isAptitude = bank.section === 'APTITUDE';
+              return (
+                <button
+                  key={bank.id}
+                  type="button"
+                  onClick={() => {
+                    setSelectedBankId(isSelected ? '' : bank.id);
+                    setCurrentPage(1);
+                    setUserSelected({});
+                    setActiveHelpTabs({});
+                  }}
+                  className={`p-4 rounded-2xl border text-left transition-all ${
+                    isSelected
+                      ? 'bg-indigo-600/20 border-indigo-400 shadow-lg shadow-indigo-950/30'
+                      : isAptitude
+                        ? 'bg-indigo-500/5 border-indigo-500/20 hover:border-indigo-400/50'
+                        : 'bg-cyan-500/5 border-cyan-500/20 hover:border-cyan-400/50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <span className={`text-sm font-extrabold ${isAptitude ? 'text-indigo-200' : 'text-cyan-200'}`}>
+                      {bank.title}
+                    </span>
+                    <span className="text-[10px] uppercase font-black tracking-wide text-amber-300 flex items-center gap-1">
+                      <Sparkles className="w-3 h-3" /> Important
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400 mt-2">
+                    {isAptitude ? 'Quantitative aptitude' : 'Java/OOP, DBMS, OS & Networks'}
+                  </p>
+                  <p className="text-[11px] text-slate-300 font-bold mt-3">
+                    {bank.questions.length} / {QUESTIONS_PER_BANK} questions
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+          {selectedBank && (
+            <div className="flex items-center justify-between gap-3 px-1">
+              <p className="text-sm font-bold text-white">{selectedBank.title} · 30 questions</p>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedBankId('');
+                  setCurrentPage(1);
+                }}
+                className="text-xs font-bold text-indigo-300 hover:text-indigo-200"
+              >
+                Show all questions
+              </button>
+            </div>
+          )}
+        </section>
+      )}
 
       {/* Question Cards List */}
       {loading ? (
@@ -240,11 +360,26 @@ export default function QuestionBank() {
           <div className="w-10 h-10 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
           <p className="text-sm text-slate-400">Loading questions...</p>
         </div>
+      ) : loadError ? (
+        <div className="py-12 px-5 text-center rounded-3xl bg-rose-950/20 border border-rose-500/30">
+          <XCircle className="w-10 h-10 text-rose-400 mx-auto mb-3" />
+          <h4 className="text-base font-bold text-rose-200">Could not load question bank</h4>
+          <p className="text-xs text-slate-300 mt-2">{loadError}</p>
+          <button
+            type="button"
+            onClick={fetchQuestions}
+            className="mt-4 px-4 py-2 rounded-lg bg-rose-500/15 border border-rose-400/30 text-rose-200 text-xs font-bold"
+          >
+            Try again
+          </button>
+        </div>
       ) : filteredQuestions.length === 0 ? (
         <div className="py-16 text-center rounded-3xl bg-slate-900/60 border border-dashed border-slate-800">
           <HelpCircle className="w-12 h-12 text-slate-600 mx-auto mb-3" />
           <h4 className="text-base font-bold text-slate-300">No Questions Found</h4>
-          <p className="text-xs text-slate-500 mt-1">Try clearing filters or search terms.</p>
+          <p className="text-xs text-slate-500 mt-1">
+            {selectedBank ? 'This set is not fully seeded yet. Restart the backend to load its questions.' : 'Try clearing filters or search terms.'}
+          </p>
         </div>
       ) : (
         <div className="space-y-4">
