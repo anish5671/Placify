@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Compass, Lock, User, Mail, Building, Briefcase, GraduationCap, ArrowRight } from 'lucide-react';
+import { Compass, Lock, User, Mail, GraduationCap, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Register() {
@@ -9,8 +9,6 @@ export default function Register() {
     email: '',
     password: '',
     fullName: '',
-    targetCompany: 'TCS',
-    targetRole: 'Software Engineer',
     graduationYear: 2025,
   });
   const [error, setError] = useState('');
@@ -141,44 +139,7 @@ export default function Register() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                  Target Company
-                </label>
-                <div className="relative">
-                  <select
-                    name="targetCompany"
-                    value={formData.targetCompany}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-950/80 border border-slate-800 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-                  >
-                    <option value="TCS">TCS</option>
-                    <option value="Amazon">Amazon</option>
-                    <option value="Infosys">Infosys</option>
-                    <option value="Accenture">Accenture</option>
-                    <option value="Google">Google</option>
-                    <option value="Microsoft">Microsoft</option>
-                    <option value="Wipro">Wipro</option>
-                    <option value="Cognizant">Cognizant</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                  Target Role
-                </label>
-                <input
-                  type="text"
-                  name="targetRole"
-                  value={formData.targetRole}
-                  onChange={handleChange}
-                  placeholder="e.g. SDE-1"
-                  className="w-full px-3 py-2 rounded-xl bg-slate-950/80 border border-slate-800 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-                />
-              </div>
-
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1.5">
                   Graduation Year
