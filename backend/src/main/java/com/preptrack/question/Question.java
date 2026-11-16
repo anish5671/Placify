@@ -26,7 +26,7 @@ public class Question {
     @Column(nullable = false, length = 500)
     private String title;
 
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -58,7 +58,7 @@ public class Question {
     @Column(name = "correct_option", length = 10)
     private String correctOption; // A, B, C, D
 
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "TEXT")
     private String explanation;
 
     @Column(columnDefinition = "TEXT")
@@ -70,7 +70,7 @@ public class Question {
     @Column(name = "external_link", length = 500)
     private String externalLink; // LeetCode or GFG link
 
-    @Column(name = "code_snippet", columnDefinition = "LONGTEXT")
+    @Column(name = "code_snippet", columnDefinition = "TEXT")
     private String codeSnippet;
 
     @Column(columnDefinition = "TEXT")

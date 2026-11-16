@@ -37,11 +37,11 @@ public class QuestionService {
     @Transactional(readOnly = true)
     public List<QuestionDto> getQuestions(String category, Long topicId, String difficulty, String search, String company) {
         List<Question> questions = questionRepository.findQuestionsWithFilters(
-                (category != null && !category.isBlank()) ? category : null,
+                (category != null && !category.isBlank()) ? category : "",
                 topicId,
-                (difficulty != null && !difficulty.isBlank()) ? difficulty : null,
-                (search != null && !search.isBlank()) ? search : null,
-                (company != null && !company.isBlank()) ? company : null
+                (difficulty != null && !difficulty.isBlank()) ? difficulty : "",
+                (search != null && !search.isBlank()) ? search : "",
+                (company != null && !company.isBlank()) ? company : ""
         );
 
         Long currentUserId = getCurrentUserId();

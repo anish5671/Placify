@@ -12,7 +12,9 @@ import java.util.Map;
 
 final class MockAssessmentCatalog {
 
-    static final int TARGET_BANK_SIZE = 100;
+    static final int APTITUDE_BANK_SIZE = 300;
+    static final int CORE_BANK_SIZE = 150;
+    static final int MOCK_SECTION_BANK_SIZE = 100;
     static final int MOCK_TEST_COUNT = 10;
     static final int QUESTIONS_PER_SECTION = 10;
     static final int QUESTIONS_PER_TEST = 20;
@@ -43,7 +45,20 @@ final class MockAssessmentCatalog {
             fact("Which class provides a mutable string builder without synchronization?", "StringBuilder", "StringBuilder is mutable and is not synchronized."),
             fact("Which map is designed for concurrent access by multiple threads?", "ConcurrentHashMap", "ConcurrentHashMap supports thread-safe concurrent map operations."),
             fact("What is the return type of a Java constructor?", "A constructor has no return type", "Constructors are not methods and do not declare a return type."),
-            fact("Which access modifier allows access from the same package and subclasses?", "protected", "Protected members are accessible within the package and through subclass access.")
+            fact("Which access modifier allows access from the same package and subclasses?", "protected", "Protected members are accessible within the package and through subclass access."),
+            fact("Which method should be overridden when defining logical equality?", "equals(Object)", "The equals method defines logical equality; hashCode should also be consistent with it."),
+            fact("Which Java construct guarantees cleanup when a resource leaves scope?", "try-with-resources", "Try-with-resources closes AutoCloseable resources when the block exits."),
+            fact("What does an enum provide?", "A type-safe fixed set of named constants", "An enum defines a restricted set of instances known at compile time."),
+            fact("What is a functional interface?", "An interface with exactly one abstract method", "A functional interface can be implemented with a lambda expression."),
+            fact("What does a Java lambda expression represent?", "An implementation of a functional interface", "A lambda supplies the implementation of a functional interface's abstract method."),
+            fact("What is the purpose of the static factory method valueOf on enums?", "Convert a matching name into an enum constant", "Enum.valueOf returns the constant whose declared name matches the supplied string."),
+            fact("What does an unmodifiable collection prevent?", "Changes through that collection reference", "An unmodifiable view rejects mutation operations through the view."),
+            fact("Which collection preserves insertion order while preventing duplicate elements?", "LinkedHashSet", "LinkedHashSet combines uniqueness with predictable insertion-order iteration."),
+            fact("What does the Comparable interface define?", "A type's natural ordering", "Comparable provides compareTo for the type's natural ordering."),
+            fact("What does a Java record primarily provide?", "A concise immutable data-carrier class", "Records generate common data-carrier members from their components."),
+            fact("What is the purpose of the volatile keyword?", "Make writes visible across threads", "Volatile provides visibility guarantees but does not make compound actions atomic."),
+            fact("Which executor service method submits a task and returns a Future?", "submit", "submit schedules a task and returns a Future representing its result."),
+            fact("What does a generic type parameter provide?", "Compile-time type safety for reusable code", "Generics allow classes and methods to operate on types while checking usage at compile time.")
     );
 
     private static final List<CoreFact> DBMS_FACTS = List.of(
@@ -71,7 +86,20 @@ final class MockAssessmentCatalog {
             fact("What is a database view?", "A named query presented as a virtual table", "A view presents query results as a table-like interface."),
             fact("What does a database schema describe?", "The structure of database objects and their relationships", "A schema defines tables, columns, constraints, and related objects."),
             fact("How should application code prevent SQL injection in parameterized queries?", "Bind user values as parameters instead of concatenating SQL", "Bound parameters keep input values separate from SQL syntax."),
-            fact("What does ON DELETE CASCADE do for a foreign key?", "Deletes dependent rows when the referenced row is deleted", "Cascade behavior propagates the parent deletion to matching child rows.")
+            fact("What does ON DELETE CASCADE do for a foreign key?", "Deletes dependent rows when the referenced row is deleted", "Cascade behavior propagates the parent deletion to matching child rows."),
+            fact("What is a composite key?", "A key formed from more than one column", "A composite key uses multiple attributes together to identify a row."),
+            fact("What is a superkey?", "Any set of attributes that uniquely identifies a row", "A superkey uniquely identifies rows and may contain unnecessary attributes."),
+            fact("What is a surrogate key?", "An artificial identifier with no business meaning", "A surrogate key is introduced to identify a row independently of business attributes."),
+            fact("What does a UNIQUE constraint enforce?", "No duplicate non-NULL key values", "A UNIQUE constraint prevents repeated values in its constrained column set."),
+            fact("What is a correlated subquery?", "A subquery that refers to columns from its outer query", "A correlated subquery depends on values from the surrounding query."),
+            fact("What does an INNER JOIN return?", "Rows that satisfy the join condition in both tables", "An inner join includes only matching row pairs."),
+            fact("What is a database transaction?", "A logical unit of database work", "A transaction groups operations that are committed or rolled back together."),
+            fact("What is a dirty read?", "Reading data written by an uncommitted transaction", "A dirty read observes changes that may later be rolled back."),
+            fact("What does a shared lock generally permit?", "Concurrent readers while preventing conflicting writes", "Shared locks allow compatible reads but conflict with exclusive modifications."),
+            fact("What is a clustered index commonly used for?", "Organizing table rows by the index key order", "A clustered index determines or closely controls the physical row organization."),
+            fact("What is a materialized view?", "A stored, refreshable result of a query", "Unlike a regular view, a materialized view persists query results."),
+            fact("What does the SQL COALESCE function return?", "The first non-NULL expression", "COALESCE evaluates arguments from left to right and returns the first non-NULL value."),
+            fact("What is a window function used for?", "Calculations across related rows without collapsing them", "Window functions compute values over a related row set while retaining each row.")
     );
 
     private static final List<CoreFact> OS_FACTS = List.of(
@@ -99,7 +127,20 @@ final class MockAssessmentCatalog {
             fact("What is starvation in scheduling?", "A process waits indefinitely because other work keeps being favored", "Starvation occurs when a task is repeatedly denied needed resources."),
             fact("How can aging reduce scheduling starvation?", "Gradually increase the priority of processes that wait", "Aging raises waiting tasks' priority over time."),
             fact("What is the producer-consumer problem?", "Coordinating producers and consumers sharing a bounded buffer", "Synchronization must prevent overflow, underflow, and unsafe concurrent access."),
-            fact("What does an operating-system scheduler choose?", "Which ready task gets CPU time next", "The scheduler selects work from the ready queue for execution.")
+            fact("What does an operating-system scheduler choose?", "Which ready task gets CPU time next", "The scheduler selects work from the ready queue for execution."),
+            fact("What is internal fragmentation?", "Unused space inside an allocated memory block", "Internal fragmentation is wasted space within an allocated region."),
+            fact("What is a critical section?", "Code that accesses shared state and needs mutual exclusion", "A critical section must be protected against unsafe concurrent access."),
+            fact("What is a monitor in concurrent programming?", "A synchronization construct combining shared state and operations", "A monitor provides controlled access to shared state using mutual exclusion and condition synchronization."),
+            fact("What is a zombie process in Unix-like systems?", "A terminated process whose exit status has not been collected", "A zombie has finished execution but remains in the process table until reaped."),
+            fact("What is an orphan process?", "A process whose parent has terminated", "An orphan process is adopted by a system process after its parent exits."),
+            fact("What does a page table map?", "Virtual pages to physical frames", "The page table translates virtual addresses into physical memory locations."),
+            fact("What is copy-on-write?", "Sharing data until a process attempts to modify it", "Copy-on-write defers copying pages until a write requires a private copy."),
+            fact("What is a bounded waiting condition in synchronization?", "A limit exists on how many times others enter before a waiting thread", "Bounded waiting prevents indefinite postponement when competing for a critical section."),
+            fact("What is a livelock?", "Tasks keep changing state but make no useful progress", "In a livelock, active responses prevent tasks from advancing toward completion."),
+            fact("What does a ready queue contain?", "Processes ready to run and waiting for CPU time", "The scheduler selects runnable processes from the ready queue."),
+            fact("What is a kernel thread?", "A thread managed and scheduled by the operating-system kernel", "The kernel tracks and schedules kernel threads."),
+            fact("What is a working set in virtual memory?", "The pages a process has recently used", "A working-set model estimates the pages needed to keep a process actively running."),
+            fact("What does a TLB cache?", "Recent virtual-to-physical address translations", "The translation lookaside buffer speeds up address translation by caching page-table entries.")
     );
 
     private static final List<CoreFact> NETWORK_FACTS = List.of(
@@ -127,7 +168,20 @@ final class MockAssessmentCatalog {
             fact("What does HTTP status code 301 indicate?", "A permanent redirect", "A 301 response indicates that the resource has moved permanently."),
             fact("Which protocol is commonly used to send email between mail servers?", "SMTP", "SMTP is used for sending and relaying email."),
             fact("Which protocol supports synchronized access to mail stored on a server?", "IMAP", "IMAP keeps mail on the server and synchronizes client views."),
-            fact("What does traceroute help reveal?", "The sequence of routing hops toward a destination", "Traceroute probes the path and reports intermediate routing hops.")
+            fact("What does traceroute help reveal?", "The sequence of routing hops toward a destination", "Traceroute probes the path and reports intermediate routing hops."),
+            fact("What does ARP resolve on an IPv4 local network?", "An IPv4 address to a link-layer MAC address", "ARP discovers the link-layer address associated with a local IPv4 address."),
+            fact("Which DNS record identifies a mail server for a domain?", "MX", "An MX record specifies mail-exchange servers for a domain."),
+            fact("What does a DNS CNAME record represent?", "An alias from one domain name to another", "A CNAME record points a name to its canonical target name."),
+            fact("What is the purpose of a subnet?", "Divide an IP network into smaller logical networks", "Subnetting separates address space into manageable routing domains."),
+            fact("What does the TCP receive window advertise?", "How much data the receiver can accept", "The receive window supports TCP flow control based on available receiver capacity."),
+            fact("What is TCP congestion control intended to prevent?", "Overloading the network path", "Congestion control adapts sending behavior to network capacity."),
+            fact("What does a firewall do?", "Apply rules to allow or block network traffic", "A firewall filters traffic according to configured security policy."),
+            fact("What is a private IPv4 address used for?", "Addressing inside private networks without global routing", "Private address ranges are intended for internal networks and are not globally routed."),
+            fact("What does a proxy server do?", "Relays requests between a client and another server", "A proxy acts as an intermediary for client requests."),
+            fact("What is a CDN designed to do?", "Serve content from geographically distributed edge locations", "A content delivery network caches content near users to reduce latency."),
+            fact("What does a socket identify?", "A communication endpoint defined by an address and transport port", "A socket combines network addressing with a transport endpoint."),
+            fact("What is packet switching?", "Sending data as packets that share network links", "Packet switching lets traffic from multiple sources use shared network infrastructure."),
+            fact("What does ICMP commonly carry?", "Network control and diagnostic messages", "ICMP reports network conditions and supports tools such as ping.")
     );
 
     private MockAssessmentCatalog() {

@@ -23,6 +23,7 @@ pnpm-debug.log*
 **/application.properties
 **/application-local.properties
 **/application-secrets.properties
+!backend/src/main/resources/application.properties
 **/*.local
 *.pem
 *.key

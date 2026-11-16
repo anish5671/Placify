@@ -747,27 +747,27 @@ public class DataInitializer implements CommandLineRunner {
                 .orElseThrow(() -> new IllegalStateException("The quantitative aptitude topic is required for mock question seeding."));
 
         List<Question> aptitudeQuestions = questionRepository.findByCategoryIgnoreCase("APTITUDE");
-        if (aptitudeQuestions.size() < MockAssessmentCatalog.TARGET_BANK_SIZE) {
+        if (aptitudeQuestions.size() < MockAssessmentCatalog.APTITUDE_BANK_SIZE) {
             Set<String> existingTitles = aptitudeQuestions.stream()
                     .map(Question::getTitle)
                     .collect(java.util.stream.Collectors.toSet());
             List<Question> additions = MockAssessmentCatalog.createAptitudeQuestions(
-                            aptitudeTopic, 1, MockAssessmentCatalog.TARGET_BANK_SIZE)
+                            aptitudeTopic, 1, MockAssessmentCatalog.APTITUDE_BANK_SIZE)
                     .stream()
                     .filter(question -> !existingTitles.contains(question.getTitle()))
-                    .limit(MockAssessmentCatalog.TARGET_BANK_SIZE - aptitudeQuestions.size())
+                    .limit(MockAssessmentCatalog.APTITUDE_BANK_SIZE - aptitudeQuestions.size())
                     .toList();
             questionRepository.saveAll(additions);
             log.info("Seeded {} aptitude questions.", additions.size());
-        } else if (aptitudeQuestions.size() > MockAssessmentCatalog.TARGET_BANK_SIZE) {
+        } else if (aptitudeQuestions.size() > MockAssessmentCatalog.APTITUDE_BANK_SIZE) {
             log.warn("Found {} aptitude questions; the requested bank size is {}.",
-                    aptitudeQuestions.size(), MockAssessmentCatalog.TARGET_BANK_SIZE);
+                    aptitudeQuestions.size(), MockAssessmentCatalog.APTITUDE_BANK_SIZE);
         }
 
         long coreQuestionCount = MockAssessmentCatalog.CORE_CATEGORIES.stream()
                 .mapToLong(questionRepository::countByCategoryIgnoreCase)
                 .sum();
-        if (coreQuestionCount < MockAssessmentCatalog.TARGET_BANK_SIZE) {
+        if (coreQuestionCount < MockAssessmentCatalog.CORE_BANK_SIZE) {
             Map<String, Topic> coreTopics = Map.of(
                     "JAVA_OOPS", topicRepository.findBySlug("java-oops")
                             .orElseThrow(() -> new IllegalStateException("The Java & OOP topic is required for mock question seeding.")),
@@ -784,16 +784,16 @@ public class DataInitializer implements CommandLineRunner {
                     .map(Question::getTitle)
                     .collect(java.util.stream.Collectors.toSet());
             List<Question> additions = MockAssessmentCatalog.createCoreQuestions(
-                            coreTopics, 1, MockAssessmentCatalog.TARGET_BANK_SIZE)
+                            coreTopics, 1, MockAssessmentCatalog.CORE_BANK_SIZE)
                     .stream()
                     .filter(question -> !existingTitles.contains(question.getTitle()))
-                    .limit(MockAssessmentCatalog.TARGET_BANK_SIZE - (int) coreQuestionCount)
+                    .limit(MockAssessmentCatalog.CORE_BANK_SIZE - (int) coreQuestionCount)
                     .toList();
             questionRepository.saveAll(additions);
             log.info("Seeded {} CSE core questions.", additions.size());
-        } else if (coreQuestionCount > MockAssessmentCatalog.TARGET_BANK_SIZE) {
+        } else if (coreQuestionCount > MockAssessmentCatalog.CORE_BANK_SIZE) {
             log.warn("Found {} CSE core questions; the requested bank size is {}.",
-                    coreQuestionCount, MockAssessmentCatalog.TARGET_BANK_SIZE);
+                    coreQuestionCount, MockAssessmentCatalog.CORE_BANK_SIZE);
         }
     }
 
@@ -806,18 +806,18 @@ public class DataInitializer implements CommandLineRunner {
                 .map(questions -> questions.stream().sorted(Comparator.comparing(Question::getId)).toList())
                 .toList();
 
-        if (aptitudeQuestions.size() < MockAssessmentCatalog.TARGET_BANK_SIZE
-                || coreQuestionsByCategory.stream().mapToInt(List::size).sum() < MockAssessmentCatalog.TARGET_BANK_SIZE) {
+        if (aptitudeQuestions.size() < MockAssessmentCatalog.MOCK_SECTION_BANK_SIZE
+                || coreQuestionsByCategory.stream().mapToInt(List::size).sum() < MockAssessmentCatalog.MOCK_SECTION_BANK_SIZE) {
             throw new IllegalStateException("Cannot create the ten Aptitude + CSE mock tests without 100 questions in each bank.");
         }
 
-        List<Question> coreQuestions = new ArrayList<>(MockAssessmentCatalog.TARGET_BANK_SIZE);
-        for (int questionIndex = 0; coreQuestions.size() < MockAssessmentCatalog.TARGET_BANK_SIZE; questionIndex++) {
+        List<Question> coreQuestions = new ArrayList<>(MockAssessmentCatalog.MOCK_SECTION_BANK_SIZE);
+        for (int questionIndex = 0; coreQuestions.size() < MockAssessmentCatalog.MOCK_SECTION_BANK_SIZE; questionIndex++) {
             for (List<Question> categoryQuestions : coreQuestionsByCategory) {
                 if (questionIndex < categoryQuestions.size()) {
                     coreQuestions.add(categoryQuestions.get(questionIndex));
                 }
-                if (coreQuestions.size() == MockAssessmentCatalog.TARGET_BANK_SIZE) {
+                if (coreQuestions.size() == MockAssessmentCatalog.MOCK_SECTION_BANK_SIZE) {
                     break;
                 }
             }

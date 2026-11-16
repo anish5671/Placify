@@ -16,27 +16,38 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class MockAssessmentCatalogTest {
 
     @Test
-    void createsOneHundredUniqueAptitudeQuestionsWithHintsAndSolutions() {
-        List<Question> questions = MockAssessmentCatalog.createAptitudeQuestions(null, 1, 100);
+    void createsThreeHundredUniqueAptitudeQuestionsWithHintsAndSolutions() {
+        List<Question> questions = MockAssessmentCatalog.createAptitudeQuestions(
+                null, 1, MockAssessmentCatalog.APTITUDE_BANK_SIZE);
 
-        assertEquals(100, questions.size());
-        assertEquals(100, questions.stream().map(Question::getTitle).distinct().count());
+        assertEquals(300, questions.size());
+        assertEquals(300, questions.stream().map(Question::getTitle).distinct().count());
+        assertEquals(300, questions.stream()
+                .map(question -> question.getTitle().substring(question.getTitle().indexOf(": ") + 2))
+                .distinct()
+                .count());
         assertQuestionsHaveFourOptionsAndValidAnswers(questions);
         assertTrue(questions.stream().allMatch(question -> question.getCategory().equals("APTITUDE")));
     }
 
     @Test
-    void createsOneHundredUniqueCoreQuestionsAcrossFourCseSubjects() {
+    void createsOneHundredFiftyUniqueCoreQuestionsAcrossFourCseSubjects() {
         HashMap<String, com.preptrack.question.Topic> topics = new HashMap<>();
         MockAssessmentCatalog.CORE_CATEGORIES.forEach(category -> topics.put(category, null));
-        List<Question> questions = MockAssessmentCatalog.createCoreQuestions(topics, 1, 100);
+        List<Question> questions = MockAssessmentCatalog.createCoreQuestions(
+                topics, 1, MockAssessmentCatalog.CORE_BANK_SIZE);
 
-        assertEquals(100, questions.size());
-        assertEquals(100, questions.stream().map(Question::getTitle).distinct().count());
+        assertEquals(150, questions.size());
+        assertEquals(150, questions.stream().map(Question::getTitle).distinct().count());
+        assertEquals(150, questions.stream()
+                .map(question -> question.getTitle().substring(question.getTitle().indexOf(": ") + 2))
+                .distinct()
+                .count());
         assertQuestionsHaveFourOptionsAndValidAnswers(questions);
-        for (String category : MockAssessmentCatalog.CORE_CATEGORIES) {
-            assertEquals(25, questions.stream().filter(question -> question.getCategory().equals(category)).count());
-        }
+        assertEquals(38, questions.stream().filter(question -> question.getCategory().equals("JAVA_OOPS")).count());
+        assertEquals(38, questions.stream().filter(question -> question.getCategory().equals("DBMS")).count());
+        assertEquals(37, questions.stream().filter(question -> question.getCategory().equals("OS")).count());
+        assertEquals(37, questions.stream().filter(question -> question.getCategory().equals("NETWORKS")).count());
     }
 
     private void assertQuestionsHaveFourOptionsAndValidAnswers(List<Question> questions) {

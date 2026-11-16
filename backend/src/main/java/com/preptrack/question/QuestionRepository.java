@@ -16,11 +16,11 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
 
     List<Question> findByDifficultyIgnoreCase(String difficulty);
 
-    @Query("SELECT q FROM Question q WHERE (:category IS NULL OR LOWER(q.category) = LOWER(:category)) " +
+    @Query("SELECT q FROM Question q WHERE (:category = '' OR LOWER(q.category) = LOWER(:category)) " +
            "AND (:topicId IS NULL OR q.topic.id = :topicId) " +
-           "AND (:difficulty IS NULL OR LOWER(q.difficulty) = LOWER(:difficulty)) " +
-           "AND (:search IS NULL OR LOWER(q.title) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(q.description) LIKE LOWER(CONCAT('%', :search, '%'))) " +
-           "AND (:company IS NULL OR LOWER(q.companyTags) LIKE LOWER(CONCAT('%', :company, '%')))")
+           "AND (:difficulty = '' OR LOWER(q.difficulty) = LOWER(:difficulty)) " +
+           "AND (:search = '' OR LOWER(q.title) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(q.description) LIKE LOWER(CONCAT('%', :search, '%'))) " +
+           "AND (:company = '' OR LOWER(q.companyTags) LIKE LOWER(CONCAT('%', :company, '%')))")
     List<Question> findQuestionsWithFilters(
             @Param("category") String category,
             @Param("topicId") Long topicId,
