@@ -55,6 +55,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/questions/dsa").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/tests").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/tests/{id:[0-9]+}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/tests/{id:[0-9]+}/start").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()
                 );
