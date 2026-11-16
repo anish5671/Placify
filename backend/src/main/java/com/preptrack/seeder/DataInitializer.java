@@ -838,7 +838,6 @@ public class DataInitializer implements CommandLineRunner {
             test.setActive(true);
             test = testRepository.save(test);
 
-            testQuestionRepository.deleteByTestId(test.getId());
             List<TestQuestion> testQuestions = new ArrayList<>(MockAssessmentCatalog.QUESTIONS_PER_TEST);
             int aptitudeStart = (testNumber - 1) * MockAssessmentCatalog.QUESTIONS_PER_SECTION;
             int coreStart = (testNumber - 1) * MockAssessmentCatalog.QUESTIONS_PER_SECTION;
@@ -856,7 +855,28 @@ public class DataInitializer implements CommandLineRunner {
                         .marks(2)
                         .build());
             }
-            testQuestionRepository.saveAll(testQuestions);
+
+            List<TestQuestion> existingQuestions =
+                    testQuestionRepository.findByTestIdOrderByQuestionOrderAsc(test.getId());
+            boolean assignmentsMatch = existingQuestions.size() == testQuestions.size();
+            if (assignmentsMatch) {
+                for (int questionIndex = 0; questionIndex < testQuestions.size(); questionIndex++) {
+                    TestQuestion existing = existingQuestions.get(questionIndex);
+                    TestQuestion desired = testQuestions.get(questionIndex);
+                    if (!existing.getQuestion().getId().equals(desired.getQuestion().getId())
+                            || existing.getQuestionOrder() != desired.getQuestionOrder()
+                            || existing.getMarks() != desired.getMarks()) {
+                        assignmentsMatch = false;
+                        break;
+                    }
+                }
+            }
+
+            if (!assignmentsMatch) {
+                testQuestionRepository.deleteByTestId(test.getId());
+                testQuestionRepository.flush();
+                testQuestionRepository.saveAll(testQuestions);
+            }
         }
         log.info("Configured {} placement mock tests with 10 aptitude and 10 CSE core questions each.",
                 MockAssessmentCatalog.MOCK_TEST_COUNT);
@@ -937,6 +957,8 @@ public class DataInitializer implements CommandLineRunner {
 
         // Create TestQuestions associations
         List<TestQuestion> tqList = new ArrayList<>();
+
+        // Add questions to TCS Test
 
         // Add questions to TCS Test
         int order = 1;
