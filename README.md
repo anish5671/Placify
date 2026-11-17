@@ -65,6 +65,13 @@ Placify is a full-stack web application that helps students and software enginee
 ### Candidate Profile
 - Manage profile details, review test history, and access bookmarked questions.
 
+### Resume Analyzer
+- Upload a PDF or DOCX resume with drag-and-drop validation and a 10 MB limit.
+- Extract resume text securely in memory and analyze it with a configurable Gemini model.
+- Review transparent score breakdowns, grouped skills, ATS guidance, strengths, weaknesses, and evidence-based improvements.
+- Optionally paste a job description to compare matching and missing skills without recommending skills absent from the resume.
+- Download a PDF report. Only structured analysis results are saved to the authenticated user's history; uploaded resume contents are not persisted.
+
 ## Database
 
 Placify uses PostgreSQL and creates/updates its schema on backend startup. The tracked `backend/src/main/resources/application.properties` contains no credentials; supply database and JWT settings through environment variables. For local Docker Compose, configure the ignored root `.env` file. For a manual backend run, set `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`, and `APP_JWT_SECRET` in the terminal.
@@ -166,6 +173,10 @@ The repository includes a GitHub Actions workflow at `.github/workflows/ci.yml` 
    - `APP_JWT_SECRET`: a newly generated Base64-encoded random key containing at least 32 bytes.
    - `APP_CORS_ALLOWED_ORIGINS`: exact frontend origin(s), comma-separated and without trailing slashes.
    - `JUDGE0_AUTH_TOKEN`: optional; only set this if the chosen Judge0 provider requires it.
+   - `GEMINI_API_KEY`: Google Gemini API key for Resume Analyzer. Keep it backend-only.
+   - `GEMINI_MODEL`: configurable Gemini model name; defaults to `gemini-2.5-flash`.
+   - `GEMINI_BASE_URL`: defaults to `https://generativelanguage.googleapis.com`.
+   - `RESUME_MAX_FILE_SIZE_BYTES`: upload limit, default `10485760` (10 MB).
 4. The health check uses `GET /api/questions`. After the first Vercel deployment, set `APP_CORS_ALLOWED_ORIGINS` to the actual Vercel production URL and redeploy the backend.
 
 ### Vercel frontend
@@ -184,6 +195,19 @@ The Render free web service is suitable for testing and hobby projects, not prod
 For CI-gated production deployments, configure GitHub branch protection for `main`: require pull requests and require both `Backend tests` and `Frontend build` status checks before merging. Deployments then happen after a passing PR is merged. Test the live frontend, login, database-backed question list, and a coding battle after initial setup.
 
 Never put Supabase credentials, JWT signing keys, or Judge0 tokens in YAML, frontend `VITE_` variables, or committed files. If a credential was previously committed, rotate it in its provider dashboard.
+
+### Resume Analyzer API
+
+All endpoints require the existing `Authorization: Bearer <JWT>` header:
+
+- `POST /api/resume/analyze` (`multipart/form-data`: `file`, optional `jobDescription`) returns structured analysis JSON.
+- `GET /api/resume/{id}/report` downloads the saved structured analysis as a PDF.
+
+Set `GEMINI_API_KEY` in the ignored root `.env` for Docker Compose or in the backend process environment for a manual run. The frontend never receives or stores this key.
+
+### Screenshots
+
+Add deployment screenshots here as the Resume Analyzer UI is promoted between environments. The feature is available at `/resume-analyzer` after sign-in.
 
 ## Demo Account
 

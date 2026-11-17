@@ -886,7 +886,6 @@ public class DataInitializer implements CommandLineRunner {
         Company tcs = companies.get("TCS");
         Company amazon = companies.get("AMAZON");
         Company infosys = companies.get("INFOSYS");
-        Company accenture = companies.get("ACCENTURE");
 
         Test tcsTest = Test.builder()
                 .title("TCS NQT National Qualifier Comprehensive Mock Test")
@@ -953,7 +952,7 @@ public class DataInitializer implements CommandLineRunner {
                 .difficulty("HARD")
                 .build();
 
-        List<Test> savedTests = testRepository.saveAll(List.of(tcsTest, amazonTest, infyTest, csCoreTest, dsaTest));
+        testRepository.saveAll(List.of(tcsTest, amazonTest, infyTest, csCoreTest, dsaTest));
 
         // Create TestQuestions associations
         List<TestQuestion> tqList = new ArrayList<>();

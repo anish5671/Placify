@@ -12,7 +12,8 @@ import {
   Flame,
   ChevronRight,
   Sparkles,
-  Swords
+  Swords,
+  FileSearch
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -28,6 +29,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     { name: '1v1 Coding Battle', path: '/battle', icon: Swords },
     { name: 'Mock Test System', path: '/tests', icon: CheckSquare },
     { name: 'Profile & Progress', path: '/profile', icon: User },
+    { name: 'Resume Analyzer', path: '/resume-analyzer', icon: FileSearch },
   ];
 
   const handleLogout = () => {

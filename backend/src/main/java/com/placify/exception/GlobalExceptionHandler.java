@@ -2,6 +2,7 @@ package com.placify.exception;
 
 import com.placify.common.ApiResponse;
 import com.placify.battle.JudgeProviderException;
+import com.placify.resume.ResumeAnalysisException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -10,6 +11,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,6 +31,12 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(ex.getMessage()));
     }
 
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiResponse<Object>> handleMaxUploadSize(MaxUploadSizeExceededException ex) {
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+                .body(ApiResponse.error("The uploaded resume is too large"));
+    }
+
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ApiResponse<Object>> handleBadCredentials(BadCredentialsException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -44,6 +52,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(JudgeProviderException.class)
     public ResponseEntity<Map<String, Object>> handleJudgeProvider(JudgeProviderException ex) {
         return ResponseEntity.status(ex.getHttpStatus()).body(Map.of(
+                "success", false,
+                "errorCode", ex.getErrorCode(),
+                "message", ex.getMessage()
+        ));
+    }
+
+    @ExceptionHandler(ResumeAnalysisException.class)
+    public ResponseEntity<Map<String, Object>> handleResumeAnalysis(ResumeAnalysisException ex) {
+        return ResponseEntity.status(ex.getStatus()).body(Map.of(
                 "success", false,
                 "errorCode", ex.getErrorCode(),
                 "message", ex.getMessage()

@@ -2,6 +2,7 @@ package com.placify.battle;
 
 import java.util.*;
 
+@SuppressWarnings("resource")
 final class CodingBattleCatalog {
 
     private CodingBattleCatalog() {}

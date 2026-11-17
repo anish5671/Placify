@@ -17,6 +17,7 @@ import TestExam from './pages/TestExam';
 import TestResult from './pages/TestResult';
 import Profile from './pages/Profile';
 import CodingBattle from './pages/CodingBattle';
+import ResumeAnalyzer from './pages/ResumeAnalyzer';
 
 export default function App() {
   return (
@@ -47,6 +48,7 @@ export default function App() {
             <Route path="/tests/:id/exam" element={<TestExam />} />
             <Route path="/tests/:attemptId/result" element={<TestResult />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/resume-analyzer" element={<ResumeAnalyzer />} />
           </Route>
 
           {/* Fallback */}
