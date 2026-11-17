@@ -47,7 +47,7 @@ export default function Register() {
           <Compass className="w-8 h-8 animate-spin-slow" />
         </div>
         <h2 className="text-3xl font-extrabold text-white tracking-tight">
-          Create PrepTrack Account
+          Create Placify Account
         </h2>
         <p className="mt-1 text-sm text-slate-400">
           Personalized syllabus, mock tests, and topic analytics

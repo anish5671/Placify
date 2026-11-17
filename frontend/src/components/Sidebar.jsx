@@ -57,7 +57,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="font-extrabold text-lg tracking-tight text-white">PrepTrack</span>
+              <span className="font-extrabold text-lg tracking-tight text-white">Placify</span>
               <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">PRO</span>
             </div>
             <p className="text-[11px] text-slate-400 font-medium">Interview Prep Platform</p>

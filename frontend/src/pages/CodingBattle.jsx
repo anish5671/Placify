@@ -380,7 +380,7 @@ export default function CodingBattle() {
             </div>
           )}
           <div className="rounded-xl border border-slate-800 bg-slate-900/50 px-4 py-3 text-xs leading-5 text-slate-500">
-            Execution is sandboxed by Judge0 CE—not run by the PrepTrack application server. Public Judge0 instances can be busy or rate-limited.
+            Execution is sandboxed by Judge0 CE—not run by the Placify application server. Public Judge0 instances can be busy or rate-limited.
           </div>
           <div className="sr-only" aria-live="polite">{participantCount} players in room</div>
         </section>
