@@ -23,10 +23,11 @@ public class GeminiAnalysisService {
 
     public GeminiAnalysisService(
             ObjectMapper objectMapper,
+            RestClient.Builder restClientBuilder,
             @Value("${gemini.base-url:https://generativelanguage.googleapis.com}") String baseUrl,
             @Value("${gemini.api-key:}") String apiKey,
             @Value("${gemini.model:gemini-2.5-flash}") String model) {
-        this.restClient = RestClient.builder().baseUrl(baseUrl).build();
+        this.restClient = restClientBuilder.baseUrl(baseUrl).build();
         this.objectMapper = objectMapper;
         this.apiKey = apiKey;
         this.model = model;
@@ -62,8 +63,8 @@ public class GeminiAnalysisService {
 
         try {
             String body = restClient.post()
-                    .uri(uriBuilder -> uriBuilder.path("/v1beta/models/{model}:generateContent")
-                            .queryParam("key", apiKey).build(model))
+                    .uri("/v1beta/models/{model}:generateContent", model)
+                    .header("x-goog-api-key", apiKey)
                     .body(Map.of(
                             "contents", new Object[]{Map.of("parts", new Object[]{Map.of("text", prompt)})},
                             "generationConfig", Map.of("responseMimeType", "application/json", "temperature", 0.2)
@@ -89,6 +90,10 @@ public class GeminiAnalysisService {
             if (ex.getStatusCode().value() == 429) {
                 throw new ResumeAnalysisException(HttpStatus.TOO_MANY_REQUESTS, "GEMINI_QUOTA_EXCEEDED",
                         "The resume analysis service quota has been reached. Please try again later");
+            }
+            if (ex.getStatusCode().value() == 403) {
+                throw new ResumeAnalysisException(HttpStatus.BAD_GATEWAY, "GEMINI_ACCESS_DENIED",
+                        "Gemini denied access. Check that the API key is valid, the Generative Language API is enabled, and the key permits this model");
             }
             throw new ResumeAnalysisException(HttpStatus.BAD_GATEWAY, "GEMINI_SERVICE_ERROR",
                     "The resume analysis service rejected the request");
