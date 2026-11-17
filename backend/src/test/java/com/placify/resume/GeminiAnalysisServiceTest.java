@@ -1,54 +1,65 @@
 package com.placify.resume;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
 
-import java.util.Map;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 class GeminiAnalysisServiceTest {
-
-    private static final String API_KEY = "test-api-key";
     private static final String BASE_URL = "https://generativelanguage.googleapis.com";
-    private MockRestServiceServer server;
-    private GeminiAnalysisService service;
 
-    @BeforeEach
-    void setUp() {
+    @Test
+    void returnsStructuredFeedbackAndSendsKeyInHeader() {
         RestClient.Builder builder = RestClient.builder();
-        server = MockRestServiceServer.bindTo(builder).build();
-        service = new GeminiAnalysisService(
-                new ObjectMapper(), builder, BASE_URL, API_KEY, "gemini-2.5-flash");
+        MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
+        server.expect(requestTo(BASE_URL + "/v1beta/models/gemini-2.5-flash:generateContent"))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(header("x-goog-api-key", "test-key"))
+                .andRespond(withSuccess("""
+                        {"candidates":[{"content":{"parts":[{"text":"{\\"summary\\":\\"Backend profile\\",\\"strengths\\":[\\"Java\\"],\\"improvementSuggestions\\":[\\"Add project impact\\"]}"}]}}]}
+                        """, MediaType.APPLICATION_JSON));
+
+        var service = service(builder, "test-key");
+        var feedback = service.analyze("Java Spring developer", List.of("java"));
+
+        assertEquals("AVAILABLE", feedback.status());
+        assertEquals("Backend profile", feedback.summary());
+        assertEquals(List.of("Java"), feedback.strengths());
+        server.verify();
     }
 
     @Test
-    void sendsApiKeyInHeaderAndExplainsForbiddenResponse() {
+    void keepsLocalAnalysisAvailableWhenGeminiDeniesAccess() {
+        RestClient.Builder builder = RestClient.builder();
+        MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
         server.expect(requestTo(BASE_URL + "/v1beta/models/gemini-2.5-flash:generateContent"))
-                .andExpect(method(HttpMethod.POST))
-                .andExpect(header("x-goog-api-key", API_KEY))
-                .andRespond(withStatus(org.springframework.http.HttpStatus.FORBIDDEN)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .body("""
-                                {"error":{"code":403,"message":"API key is not authorized","status":"PERMISSION_DENIED"}}
-                                """));
+                .andRespond(withStatus(org.springframework.http.HttpStatus.FORBIDDEN));
 
-        ResumeAnalysisException exception = assertThrows(ResumeAnalysisException.class,
-                () -> service.analyze("resume text", Map.of(), null));
+        var feedback = service(builder, "test-key").analyze("Java developer", List.of("java"));
 
-        assertEquals("GEMINI_ACCESS_DENIED", exception.getErrorCode());
-        assertTrue(exception.getMessage().contains("API key is valid"));
+        assertEquals("ACCESS_DENIED", feedback.status());
         server.verify();
+    }
+
+    @Test
+    void reportsMissingKeyWithoutMakingARequest() {
+        var feedback = service(RestClient.builder(), "").analyze("Java developer", List.of("java"));
+
+        assertEquals("NOT_CONFIGURED", feedback.status());
+    }
+
+    private GeminiAnalysisService service(RestClient.Builder builder, String key) {
+        return new GeminiAnalysisService(builder, new ObjectMapper(), BASE_URL, key, "gemini-2.5-flash");
     }
 }

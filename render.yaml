@@ -21,3 +21,11 @@ services:
         sync: false
       - key: JUDGE0_BASE_URL
         value: https://ce.judge0.com
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash
+      - key: GEMINI_BASE_URL
+        value: https://generativelanguage.googleapis.com
+      - key: RESUME_MAX_FILE_SIZE_BYTES
+        value: "10485760"

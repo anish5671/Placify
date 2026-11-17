@@ -2,25 +2,37 @@ package com.placify.resume;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ResumeScoringServiceTest {
-
     private final ResumeScoringService service = new ResumeScoringService();
 
     @Test
-    void scoresPresentSectionsAndReportsMissingSections() {
-        Map<String, Object> result = service.score("Jane Doe\nSkills\nJava Spring\nEducation\nB.Tech\nProjects\nAPI");
+    void scoreIsBoundedAndReportsMissingSections() {
+        var result = service.score("""
+                Contact: person@example.com
+                Skills
+                Java Spring Boot SQL
+                Education
+                University
+                Projects
+                Built an application.
+                Experience
+                Software developer
+                Certifications
+                Java certificate
+                """.repeat(4));
 
-        assertTrue((Integer) result.get("overallScore") > 0);
-        assertTrue(service.missingSections("Skills\nEducation").contains("experience"));
-        assertFalse(service.missingSections("Skills\nEducation").contains("skills"));
+        assertEquals(100, result.overallScore());
+        assertTrue(result.missingSections().isEmpty());
     }
 
     @Test
-    void handlesEmptyResumeWithoutThrowing() {
-        assertEquals(0, service.score("").get("overallScore"));
+    void shortResumeGetsLowScoreAndMissingSectionChecklist() {
+        var result = service.score("Java developer");
+
+        assertTrue(result.overallScore() < 30);
+        assertTrue(result.missingSections().contains("projects"));
     }
 }

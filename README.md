@@ -178,12 +178,14 @@ The repository includes a GitHub Actions workflow at `.github/workflows/ci.yml` 
    - `GEMINI_BASE_URL`: defaults to `https://generativelanguage.googleapis.com`.
    - `RESUME_MAX_FILE_SIZE_BYTES`: upload limit, default `10485760` (10 MB).
 4. The health check uses `GET /api/questions`. After the first Vercel deployment, set `APP_CORS_ALLOWED_ORIGINS` to the actual Vercel production URL and redeploy the backend.
+5. Resume analysis uses local PDF/DOCX extraction, skill/role matching, and checklist scoring. Gemini only provides optional written feedback; if Gemini is unavailable or returns 403, the local analysis and role matches still appear with an explicit AI status.
+6. To enable Gemini feedback, create a key in Google AI Studio, confirm the Generative Language API and selected model are available to its project, and set `GEMINI_API_KEY` in Render's backend environment. Keep the key out of Vercel, frontend variables, source files, screenshots, and Git. `GEMINI_MODEL` defaults to `gemini-2.5-flash`.
 
 ### Vercel frontend
 
 1. Import the same GitHub repository into Vercel and set **Root Directory** to `frontend`.
 2. Use build command `npm run build` and output directory `dist`.
-3. Set the Production environment variable `VITE_API_BASE_URL` to `https://<your-render-service>.onrender.com/api`.
+3. Set the Production environment variable `VITE_API_BASE_URL` to `https://<your-render-service>.onrender.com/api`. Do not add the Gemini key to Vercel; the browser calls the backend, which calls Gemini.
 4. The existing `frontend/vercel.json` rewrites SPA routes to `index.html`.
 
 ### Continuous integration and automatic deployments
@@ -200,10 +202,11 @@ Never put Supabase credentials, JWT signing keys, or Judge0 tokens in YAML, fron
 
 All endpoints require the existing `Authorization: Bearer <JWT>` header:
 
-- `POST /api/resume/analyze` (`multipart/form-data`: `file`, optional `jobDescription`) returns structured analysis JSON.
-- `GET /api/resume/{id}/report` downloads the saved structured analysis as a PDF.
+- `POST /api/resume/analyze` accepts `multipart/form-data` with a `file` (PDF or DOCX, up to 10 MB) and optional `jobDescription` (up to 12,000 characters). It returns a transparent local checklist score, skills detected from a curated catalog, up to three skill-evidence-based role matches, and an optional match against the supplied job description. It does not persist the resume or analysis.
 
-Set `GEMINI_API_KEY` in the ignored root `.env` for Docker Compose or in the backend process environment for a manual run. The frontend never receives or stores this key.
+Gemini supplies optional written feedback only. If its key is missing, denied, rate-limited, or unavailable, local scoring and job matching still return; the response's `aiFeedback.status` and `aiFeedback.message` explain why AI feedback was unavailable.
+
+Set `GEMINI_API_KEY` in the ignored root `.env` for Docker Compose or in the backend process environment for a manual run. For Render deployments, set it only on the backend service. The frontend never receives or stores this key. Resume text is sent to Google Gemini only when AI feedback is enabled and the backend key is configured; tell users before upload.
 
 ### Screenshots
 

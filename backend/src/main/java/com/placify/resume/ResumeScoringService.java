@@ -2,54 +2,50 @@ package com.placify.resume;
 
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 @Component
 public class ResumeScoringService {
+    private static final List<Section> SECTIONS = List.of(
+            new Section("skills", 18, List.of("skills", "technical skills", "core competencies")),
+            new Section("experience", 22, List.of("experience", "work experience", "employment history", "professional experience")),
+            new Section("projects", 18, List.of("projects", "personal projects", "academic projects")),
+            new Section("education", 14, List.of("education", "academic background")),
+            new Section("contactInformation", 9, List.of("contact", "email", "phone")),
+            new Section("certifications", 9, List.of("certifications", "certificates", "licenses"))
+    );
 
-    private static final List<String> SECTIONS = List.of("education", "experience", "projects", "skills", "certifications", "achievements");
-
-    public Map<String, Object> score(String text) {
-        if (text == null || text.isBlank()) {
-            return Map.of("overallScore", 0, "sectionScores", Map.of(),
-                    "methodology", "Scores combine section presence, content depth, readable formatting, and ATS-safe headings. AI feedback explains each deduction.");
-        }
-        String lower = text.toLowerCase(Locale.ROOT);
+    public Score score(String resumeText) {
+        String lowerText = resumeText.toLowerCase(Locale.ROOT);
         Map<String, Integer> scores = new LinkedHashMap<>();
-        scores.put("skills", sectionScore(lower, "skills", 18));
-        scores.put("education", sectionScore(lower, "education", 14));
-        scores.put("projects", sectionScore(lower, "projects", 18));
-        scores.put("workExperience", sectionScore(lower, "experience", 20));
-        scores.put("formattingAndReadability", formattingScore(text));
-        scores.put("atsCompatibility", atsScore(lower));
-        int total = (int) Math.round(scores.values().stream().mapToInt(Integer::intValue).sum() * 100.0 / 100);
-        return Map.of("overallScore", Math.min(100, total), "sectionScores", scores,
-                "methodology", "Scores combine section presence, content depth, readable formatting, and ATS-safe headings. AI feedback explains each deduction.");
+        int overall = 0;
+        for (Section section : SECTIONS) {
+            boolean present = section.markers().stream().anyMatch(lowerText::contains);
+            int points = present ? section.weight() : 0;
+            scores.put(section.name(), points);
+            overall += points;
+        }
+
+        if (resumeText.length() < 500) {
+            overall -= 10;
+            scores.put("contentDepth", 0);
+        } else {
+            scores.put("contentDepth", 10);
+            overall += 10;
+        }
+
+        List<String> missing = SECTIONS.stream()
+                .filter(section -> !section.name().equals("contactInformation"))
+                .filter(section -> section.markers().stream().noneMatch(lowerText::contains))
+                .map(Section::name)
+                .toList();
+        return new Score(Math.max(0, Math.min(100, overall)), Map.copyOf(scores), missing);
     }
 
-    public List<String> missingSections(String text) {
-        String lower = text.toLowerCase(Locale.ROOT);
-        return SECTIONS.stream().filter(section -> !lower.contains(section)).toList();
-    }
+    public record Score(int overallScore, Map<String, Integer> sectionScores, List<String> missingSections) {}
 
-    private int sectionScore(String text, String section, int weight) {
-        if (!text.contains(section)) return 0;
-        return Math.min(weight, weight - 2 + Math.min(2, text.split(section, -1).length - 1));
-    }
-
-    private int formattingScore(String text) {
-        int score = 12;
-        if (text.length() < 500) score -= 4;
-        if (text.split("\\R").length < 8) score -= 3;
-        return Math.max(0, score);
-    }
-
-    private int atsScore(String text) {
-        int score = 10;
-        if (!text.contains("email") && !text.contains("@")) score -= 3;
-        if (!text.contains("phone") && !text.matches("(?s).*\\b\\+?[0-9][0-9 ()-]{7,}.*")) score -= 2;
-        if (text.contains("education")) score += 1;
-        if (text.contains("experience")) score += 1;
-        return Math.min(12, score);
-    }
+    private record Section(String name, int weight, List<String> markers) {}
 }

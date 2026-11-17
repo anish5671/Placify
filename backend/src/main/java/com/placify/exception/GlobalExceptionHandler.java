@@ -2,7 +2,6 @@ package com.placify.exception;
 
 import com.placify.common.ApiResponse;
 import com.placify.battle.JudgeProviderException;
-import com.placify.resume.ResumeAnalysisException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -52,15 +51,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(JudgeProviderException.class)
     public ResponseEntity<Map<String, Object>> handleJudgeProvider(JudgeProviderException ex) {
         return ResponseEntity.status(ex.getHttpStatus()).body(Map.of(
-                "success", false,
-                "errorCode", ex.getErrorCode(),
-                "message", ex.getMessage()
-        ));
-    }
-
-    @ExceptionHandler(ResumeAnalysisException.class)
-    public ResponseEntity<Map<String, Object>> handleResumeAnalysis(ResumeAnalysisException ex) {
-        return ResponseEntity.status(ex.getStatus()).body(Map.of(
                 "success", false,
                 "errorCode", ex.getErrorCode(),
                 "message", ex.getMessage()

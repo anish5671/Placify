@@ -1,5 +1,6 @@
 package com.placify.resume;
 
+import com.placify.exception.BadRequestException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -11,46 +12,56 @@ import org.springframework.mock.web.MockMultipartFile;
 
 import java.io.ByteArrayOutputStream;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ResumeTextExtractorTest {
-
     private final ResumeTextExtractor extractor = new ResumeTextExtractor();
 
     @Test
-    void extractsPdfText() throws Exception {
+    void extractsTextFromPdf() throws Exception {
         byte[] bytes;
-        try (PDDocument document = new PDDocument();
-             ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+        try (var document = new PDDocument(); var output = new ByteArrayOutputStream()) {
             PDPage page = new PDPage();
             document.addPage(page);
-            try (PDPageContentStream stream = new PDPageContentStream(document, page)) {
-                stream.beginText();
-                stream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 12);
-                stream.newLineAtOffset(50, 700);
-                stream.showText("Jane Doe Java");
-                stream.endText();
+            try (var content = new PDPageContentStream(document, page)) {
+                content.beginText();
+                content.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 12);
+                content.newLineAtOffset(25, 700);
+                content.showText("Java engineer with Spring experience");
+                content.endText();
             }
             document.save(output);
             bytes = output.toByteArray();
         }
 
-        String text = extractor.extract(new MockMultipartFile("file", "resume.pdf", "application/pdf", bytes), "pdf");
-        assertTrue(text.contains("Jane Doe Java"));
+        String text = extractor.extract(file("resume.pdf", bytes), "pdf");
+
+        assertTrue(text.contains("Java engineer"));
     }
 
     @Test
-    void extractsDocxText() throws Exception {
+    void extractsTextFromDocx() throws Exception {
         byte[] bytes;
-        try (XWPFDocument document = new XWPFDocument();
-             ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-            document.createParagraph().createRun().setText("Jane Doe Spring Boot");
+        try (var document = new XWPFDocument(); var output = new ByteArrayOutputStream()) {
+            document.createParagraph().createRun().setText("Java engineer with Spring experience");
             document.write(output);
             bytes = output.toByteArray();
         }
 
-        String text = extractor.extract(new MockMultipartFile("file", "resume.docx",
-                "application/vnd.openxmlformats-officedocument.wordprocessingml.document", bytes), "docx");
-        assertTrue(text.contains("Jane Doe Spring Boot"));
+        String text = extractor.extract(file("resume.docx", bytes), "docx");
+
+        assertTrue(text.contains("Java engineer"));
+    }
+
+    @Test
+    void rejectsUnreadableScannedDocument() {
+        var file = file("resume.pdf", new byte[]{1, 2, 3});
+
+        assertThrows(BadRequestException.class, () -> extractor.extract(file, "pdf"));
+    }
+
+    private MockMultipartFile file(String name, byte[] bytes) {
+        return new MockMultipartFile("file", name, "application/octet-stream", bytes);
     }
 }
