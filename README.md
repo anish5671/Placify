@@ -1,6 +1,6 @@
-# PrepTrack - Interview Preparation Platform
+# Placify - Interview Preparation Platform
 
-PrepTrack is a full-stack web application that helps students and software engineers prepare for technical interviews, campus placements, and company assessments.
+Placify is a full-stack web application that helps students and software engineers prepare for technical interviews, campus placements, and company assessments.
 
 ## Technology Stack
 
@@ -155,7 +155,7 @@ The repository includes a GitHub Actions workflow at `.github/workflows/ci.yml` 
 
 ### Render backend
 
-1. Connect the GitHub repository to Render and create a Blueprint using the root `render.yaml`, or create a Docker web service manually.
+1. Connect the GitHub repository to Render and create a Blueprint using the root `render.yaml`, or create a Docker web service manually. The Blueprint selects Render's free web-service plan.
 2. For a manual service, use branch `main`, Dockerfile `backend/Dockerfile`, and Docker context `backend`.
 3. Set these environment variables in the Render dashboard:
    - `SPRING_DATASOURCE_URL`: Supabase session-pooler JDBC URL with `sslmode=require`.
@@ -176,6 +176,8 @@ The repository includes a GitHub Actions workflow at `.github/workflows/ci.yml` 
 ### Continuous integration and automatic deployments
 
 Connect both providers to the GitHub repository and set their production branch to `main`. Enable automatic deployment on pushes in Render; Vercel automatically creates preview deployments for pull requests and production deployments after merges to the production branch.
+
+The Render free web service is suitable for testing and hobby projects, not production: it spins down after 15 minutes without traffic and its first request after that can take about a minute. Free service usage and monthly limits can change; check Render's current billing dashboard and do not select a paid plan if you do not want charges.
 
 For CI-gated production deployments, configure GitHub branch protection for `main`: require pull requests and require both `Backend tests` and `Frontend build` status checks before merging. Deployments then happen after a passing PR is merged. Test the live frontend, login, database-backed question list, and a coding battle after initial setup.
 
