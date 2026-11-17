@@ -112,7 +112,7 @@ export default function Login() {
                   required
                   value={usernameOrEmail}
                   onChange={(e) => setUsernameOrEmail(e.target.value)}
-                  placeholder="e.g. demo or demo@preptrack.com"
+                  placeholder="e.g. demo or demo@placify.com"
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950/80 border border-slate-800 text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-colors"
                 />
               </div>

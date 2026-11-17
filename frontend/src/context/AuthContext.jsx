@@ -2,6 +2,10 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '../api/client';
 
 const AuthContext = createContext(null);
+const TOKEN_STORAGE_KEY = 'placify_token';
+const USER_STORAGE_KEY = 'placify_user';
+const LEGACY_TOKEN_STORAGE_KEY = 'preptrack_token';
+const LEGACY_USER_STORAGE_KEY = 'preptrack_user';
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -9,17 +13,30 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedToken = localStorage.getItem('preptrack_token');
-    const savedUser = localStorage.getItem('preptrack_user');
+    const savedToken = localStorage.getItem(TOKEN_STORAGE_KEY)
+      || localStorage.getItem(LEGACY_TOKEN_STORAGE_KEY);
+    const savedUser = localStorage.getItem(USER_STORAGE_KEY)
+      || localStorage.getItem(LEGACY_USER_STORAGE_KEY);
 
     if (savedToken && savedUser) {
+      let userData;
       try {
-        setToken(savedToken);
-        setUser(JSON.parse(savedUser));
-      } catch (e) {
-        localStorage.removeItem('preptrack_token');
-        localStorage.removeItem('preptrack_user');
+        userData = JSON.parse(savedUser);
+      } catch {
+        localStorage.removeItem(TOKEN_STORAGE_KEY);
+        localStorage.removeItem(USER_STORAGE_KEY);
+        localStorage.removeItem(LEGACY_TOKEN_STORAGE_KEY);
+        localStorage.removeItem(LEGACY_USER_STORAGE_KEY);
+        setLoading(false);
+        return;
       }
+
+      localStorage.setItem(TOKEN_STORAGE_KEY, savedToken);
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userData));
+      localStorage.removeItem(LEGACY_TOKEN_STORAGE_KEY);
+      localStorage.removeItem(LEGACY_USER_STORAGE_KEY);
+      setToken(savedToken);
+      setUser(userData);
     }
     setLoading(false);
   }, []);
@@ -40,8 +57,8 @@ export const AuthProvider = ({ children }) => {
         role: data.role,
       };
 
-      localStorage.setItem('preptrack_token', authToken);
-      localStorage.setItem('preptrack_user', JSON.stringify(userData));
+      localStorage.setItem(TOKEN_STORAGE_KEY, authToken);
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userData));
       setToken(authToken);
       setUser(userData);
       return userData;
@@ -65,8 +82,8 @@ export const AuthProvider = ({ children }) => {
         role: data.role,
       };
 
-      localStorage.setItem('preptrack_token', authToken);
-      localStorage.setItem('preptrack_user', JSON.stringify(userData));
+      localStorage.setItem(TOKEN_STORAGE_KEY, authToken);
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userData));
       setToken(authToken);
       setUser(userData);
       return userData;
@@ -75,15 +92,17 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem('preptrack_token');
-    localStorage.removeItem('preptrack_user');
+    localStorage.removeItem(TOKEN_STORAGE_KEY);
+    localStorage.removeItem(USER_STORAGE_KEY);
+    localStorage.removeItem(LEGACY_TOKEN_STORAGE_KEY);
+    localStorage.removeItem(LEGACY_USER_STORAGE_KEY);
     setToken(null);
     setUser(null);
   };
 
   const updateUser = (updatedUser) => {
     setUser(updatedUser);
-    localStorage.setItem('preptrack_user', JSON.stringify(updatedUser));
+    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(updatedUser));
   };
 
   return (

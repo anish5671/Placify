@@ -9,7 +9,7 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('preptrack_token');
+    const token = localStorage.getItem('placify_token') || localStorage.getItem('preptrack_token');
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
@@ -27,6 +27,8 @@ api.interceptors.response.use(
       if (!url.includes('/auth/login') && !url.includes('/auth/register')) {
         localStorage.removeItem('preptrack_token');
         localStorage.removeItem('preptrack_user');
+        localStorage.removeItem('placify_token');
+        localStorage.removeItem('placify_user');
         window.location.href = '/login';
       }
     }

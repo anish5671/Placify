@@ -67,7 +67,7 @@ Placify is a full-stack web application that helps students and software enginee
 
 ## Database
 
-PrepTrack uses PostgreSQL and creates/updates its schema on backend startup. The tracked `backend/src/main/resources/application.properties` contains no credentials; supply database and JWT settings through environment variables. For local Docker Compose, configure the ignored root `.env` file. For a manual backend run, set `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`, and `APP_JWT_SECRET` in the terminal.
+Placify uses PostgreSQL and creates/updates its schema on backend startup. The tracked `backend/src/main/resources/application.properties` contains no credentials; supply database and JWT settings through environment variables. For local Docker Compose, configure the ignored root `.env` file. For a manual backend run, set `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`, and `APP_JWT_SECRET` in the terminal.
 
 To restore the tracked local template if it is missing:
 
@@ -76,6 +76,8 @@ Copy-Item backend\src\main\resources\application.example.properties backend\src\
 ```
 
 Keep your database password and JWT secret private. Each developer should use their own local values. Never commit `.env` files or put credentials in frontend environment variables.
+
+The default PostgreSQL database, user, and Compose volume identifiers are intentionally unchanged so an existing local database and its data continue to be reused. Do not rename these identifiers unless you also migrate the database and volume.
 
 ## Run Everything with Docker Compose
 
@@ -106,7 +108,7 @@ docker compose down --remove-orphans
 docker compose up --build
 ```
 
-Open `http://localhost:5173`. The backend is available at `http://localhost:8080`. PostgreSQL is only reachable by the Compose services, not exposed on a host port. The `preptrack_postgres_data` volume preserves PostgreSQL data when containers stop or are rebuilt. The old `preptrack_mysql_data` volume is not automatically converted or deleted; the new PostgreSQL database starts with the application's seeded data. Stop services with `Ctrl+C`, or run `docker compose down`. **Do not use `docker compose down -v` unless you intend to delete the PostgreSQL data volume.**
+Open `http://localhost:5173`. The backend is available at `http://localhost:8080`. PostgreSQL is only reachable by the Compose services, not exposed on a host port. The named PostgreSQL volume preserves data when containers stop or are rebuilt. The old MySQL volume is not automatically converted or deleted; the new PostgreSQL database starts with the application's seeded data. Stop services with `Ctrl+C`, or run `docker compose down`. **Do not use `docker compose down -v` unless you intend to delete the PostgreSQL data volume.**
 
 The database seeds the question banks and mock tests when the backend starts. Question seeding is repeatable and fills missing catalog questions without deleting existing user progress. A first run builds the images and downloads dependencies, so it may take a few minutes.
 
@@ -133,7 +135,7 @@ The backend runs at `http://localhost:8080`. On startup, it creates or updates t
 
 ### Start the Frontend
 
-Install PostgreSQL locally, create `preptrack_db`, and set the `DB_USERNAME` and `DB_PASSWORD` environment variables as described above. Then open a second terminal:
+Install PostgreSQL locally, create the database configured by `POSTGRES_DB` in `.env.example`, and set the `DB_USERNAME` and `DB_PASSWORD` environment variables as described above. Then open a second terminal:
 
 ```powershell
 cd frontend
@@ -185,7 +187,7 @@ Never put Supabase credentials, JWT signing keys, or Judge0 tokens in YAML, fron
 
 ## Demo Account
 
-- Username or email: `demo` or `demo@preptrack.com`
+- Username: `demo`
 - Password: `password123`
 
 You can also use the demo sign-in option on the login page.
