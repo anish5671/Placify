@@ -333,7 +333,7 @@ export default function CodingBattle() {
         </section>
 
         <section className="space-y-3">
-          <div className="overflow-hidden rounded-2xl border border-slate-800 bg-[#0b1120]">
+          <div data-code-workspace className="overflow-hidden rounded-2xl border border-slate-800 bg-[#0b1120]">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 px-3 py-3 sm:px-4">
               <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
                 Language
