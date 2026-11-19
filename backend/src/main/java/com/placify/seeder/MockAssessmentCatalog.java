@@ -20,6 +20,9 @@ final class MockAssessmentCatalog {
     static final int QUESTIONS_PER_TEST = 20;
     static final List<String> CORE_CATEGORIES = List.of("JAVA_OOPS", "DBMS", "OS", "NETWORKS");
     private static final String APTITUDE_REFERENCE = "https://www.indiabix.com/aptitude/";
+    private static final String COMPANY_PRACTICE_TAGS = "Amazon,Infosys,Accenture,Google,Microsoft";
+    private static final String CATALOG_DESCRIPTION =
+            "Original company-style practice question. Not a verified company PYQ; linked references are for concept revision.";
 
     private static final List<CoreFact> JAVA_FACTS = List.of(
             fact("A shared counter is volatile and updated with count++. Can two threads still lose an increment?", "Yes; volatile does not make the read-modify-write operation atomic", "volatile guarantees visibility and ordering for accesses, but count++ is a compound operation. Use synchronization or an atomic type for an atomic increment."),
@@ -211,7 +214,7 @@ final class MockAssessmentCatalog {
             }
             questions.add(buildQuestion(
                     String.format(Locale.ROOT, "Core CS %03d: %s", number, fact.prompt()),
-                    "Original Placify practice question. Use the linked reference for concept revision; the question is not copied.",
+                    CATALOG_DESCRIPTION,
                     topics.get(category),
                     category,
                     fact.answer(),
@@ -250,22 +253,18 @@ final class MockAssessmentCatalog {
                 distractors = numberDistractors(finalPrice);
             }
             case 1 -> {
-                int firstPart = 2 + variation % 5;
-                int secondPart = 3 + variation % 4;
-                int thirdPart = 4 + variation % 3;
-                int multiplier = variation + 4;
-                int total = (firstPart + secondPart + thirdPart) * multiplier;
-                int share = firstPart * multiplier;
+                int multiplier = variation + 3;
+                int total = 35 * multiplier;
+                int firstShare = 8 * multiplier;
                 title = String.format(Locale.ROOT,
-                        "A budget of %d is split among three teams in the ratio %d:%d:%d. How much does the first team receive?",
-                        total, firstPart, secondPart, thirdPart);
+                        "Three teams share %d in the ratios A:B = 2:3 and B:C = 4:5. How much does team A receive?",
+                        total);
                 explanation = String.format(Locale.ROOT,
-                        "There are %d + %d + %d = %d ratio parts. One part is %d / %d = %d, so the first team receives %d x %d = %d.",
-                        firstPart, secondPart, thirdPart, firstPart + secondPart + thirdPart,
-                        total, firstPart + secondPart + thirdPart, multiplier, firstPart, multiplier, share);
-                hint = "Include all three ratio terms when finding the value of one part.";
-                answer = Integer.toString(share);
-                distractors = numberDistractors(share);
+                        "Make the two B terms equal: A:B = 8:12 and B:C = 12:15, so A:B:C = 8:12:15. One part is %d/35 = %d; A receives 8 x %d = %d.",
+                        total, multiplier, multiplier, firstShare);
+                hint = "Scale both ratios so the shared B term matches, then combine the three terms.";
+                answer = Integer.toString(firstShare);
+                distractors = numberDistractors(firstShare);
             }
             case 2 -> {
                 int cost = 200 * (variation + 5);
@@ -314,28 +313,41 @@ final class MockAssessmentCatalog {
                 distractors = numberDistractors(averageSpeed);
             }
             case 5 -> {
-                int principal = 1000 * (variation + 1);
-                int rate = 6 + variation;
-                int time = 2 + variation;
-                int interest = principal * rate * time / 100;
-                title = String.format(Locale.ROOT, "Find the simple interest on %d at %d%% per year for %d years.", principal, rate, time);
-                explanation = String.format(Locale.ROOT, "Simple interest = P x R x T / 100 = %d x %d x %d / 100 = %d.", principal, rate, time, interest);
-                hint = "Apply simple interest = principal x annual rate x time / 100.";
-                answer = Integer.toString(interest);
-                distractors = numberDistractors(interest);
+                int principal = 10000 * (variation + 1);
+                int years = 2 + variation % 3;
+                int compoundAmount = BigDecimal.valueOf(principal)
+                        .multiply(BigDecimal.valueOf(1.1).pow(years))
+                        .setScale(0, RoundingMode.HALF_UP).intValueExact();
+                int compoundInterest = compoundAmount - principal;
+                int simpleInterest = principal * 10 * years / 100;
+                int difference = compoundInterest - simpleInterest;
+                title = String.format(Locale.ROOT,
+                        "An investment of %d earns 10%% annually for %d years. How much more interest does annual compounding earn than simple interest?",
+                        principal, years);
+                explanation = String.format(Locale.ROOT,
+                        "Compound interest = %d x (1.1)^%d - %d = %d. Simple interest = %d x 10 x %d/100 = %d. Difference = %d.",
+                        principal, years, principal, compoundInterest, principal, years, simpleInterest, difference);
+                hint = "Calculate both interest amounts for the same principal and term, then subtract simple interest from compound interest.";
+                answer = Integer.toString(difference);
+                distractors = numberDistractors(difference);
             }
             case 6 -> {
                 int principal = 10000 * (variation + 1);
-                int years = 1 + variation % 3;
+                int firstRate = 10 + variation % 3 * 5;
+                int secondRate = firstRate + 5;
                 int amount = BigDecimal.valueOf(principal)
-                        .multiply(BigDecimal.valueOf(1.1).pow(years))
+                        .multiply(BigDecimal.valueOf(1 + firstRate / 100.0))
+                        .multiply(BigDecimal.valueOf(1 + secondRate / 100.0))
                         .setScale(0, RoundingMode.HALF_UP).intValueExact();
-                int interest = amount - principal;
-                title = String.format(Locale.ROOT, "What compound interest is earned on %d at 10%% annually for %d year(s)?", principal, years);
-                explanation = String.format(Locale.ROOT, "Amount = P x (1 + R/100)^T = %d x (1.1)^%d = %d. Interest = amount - principal = %d.", principal, years, amount, interest);
-                hint = "Calculate the compound amount with P(1 + rate)^time, then subtract the principal.";
-                answer = Integer.toString(interest);
-                distractors = numberDistractors(interest);
+                title = String.format(Locale.ROOT,
+                        "A principal of %d is invested for two years at %d%% in year one and %d%% in year two. What is the final amount?",
+                        principal, firstRate, secondRate);
+                explanation = String.format(Locale.ROOT,
+                        "Apply each year's rate to the updated balance: %d x (1 + %d/100) x (1 + %d/100) = %d.",
+                        principal, firstRate, secondRate, amount);
+                hint = "The second year's interest is calculated on the balance after year one.";
+                answer = Integer.toString(amount);
+                distractors = numberDistractors(amount);
             }
             case 7 -> {
                 int red = 2 + variation;
@@ -355,30 +367,42 @@ final class MockAssessmentCatalog {
                         fraction(blue, total));
             }
             case 8 -> {
-                int firstWorkerDays = 6 + variation * 3;
+                int firstWorkerDays = 12 + variation * 12;
                 int secondWorkerDays = firstWorkerDays * 2;
-                int daysTogether = firstWorkerDays * secondWorkerDays / (firstWorkerDays + secondWorkerDays);
-                title = String.format(Locale.ROOT, "Worker A completes a job in %d days and worker B in %d days. How many days do they need working together?", firstWorkerDays, secondWorkerDays);
-                explanation = String.format(Locale.ROOT, "Their combined daily rate is 1/%d + 1/%d = %d/%d of the job. The time is the reciprocal, %d days.", firstWorkerDays, secondWorkerDays, firstWorkerDays + secondWorkerDays, firstWorkerDays * secondWorkerDays, daysTogether);
-                hint = "Add the workers' one-day work rates, then take the reciprocal of the combined rate.";
-                answer = Integer.toString(daysTogether);
-                distractors = numberDistractors(daysTogether);
+                int togetherDays = firstWorkerDays / 3;
+                int remainingDays = firstWorkerDays / 2;
+                int totalDays = togetherDays + remainingDays;
+                title = String.format(Locale.ROOT,
+                        "Worker A can finish a job in %d days and worker B in %d days. They work together until half the job is done, then B leaves. What is the total time?",
+                        firstWorkerDays, secondWorkerDays);
+                explanation = String.format(Locale.ROOT,
+                        "Their combined rate is 1/%d + 1/%d = 1/(%d/3), so half the job takes %d days. A completes the remaining half in %d/2 = %d days. Total = %d days.",
+                        firstWorkerDays, secondWorkerDays, firstWorkerDays, togetherDays,
+                        firstWorkerDays, remainingDays, totalDays);
+                hint = "Find the combined rate for the first half, then let A complete the remaining half alone.";
+                answer = Integer.toString(totalDays);
+                distractors = numberDistractors(totalDays);
             }
             default -> {
                 int younger = 18 + variation;
-                int older = 2 * younger + 4;
-                int difference = older - younger;
-                title = String.format(Locale.ROOT, "An older sibling is twice as old as a younger sibling plus 4 years. If the younger sibling is %d, what is their age difference?", younger);
-                explanation = String.format(Locale.ROOT, "Older age = 2 x %d + 4 = %d. The difference is %d - %d = %d years.", younger, older, older, younger, difference);
-                hint = "Find the older age from the relationship, then subtract the younger age.";
-                answer = Integer.toString(difference);
-                distractors = numberDistractors(difference);
+                int yearsAgo = 4 + variation % 3;
+                int older = 2 * younger - yearsAgo;
+                int totalAge = younger + older;
+                title = String.format(Locale.ROOT,
+                        "Two siblings' current ages sum to %d. %d years ago, the older sibling was twice as old as the younger. How old is the older sibling now?",
+                        totalAge, yearsAgo);
+                explanation = String.format(Locale.ROOT,
+                        "Let the younger sibling's current age be y. Then older = 2(y - %d) + %d = 2y - %d. Using the sum %d gives y = %d and older = %d.",
+                        yearsAgo, yearsAgo, yearsAgo, totalAge, younger, older);
+                hint = "Use both the age sum and the ratio from years ago to form two equations.";
+                answer = Integer.toString(older);
+                distractors = numberDistractors(older);
             }
         }
 
         return buildQuestion(
                 String.format(Locale.ROOT, "Aptitude %03d: %s", number, title),
-                "Original Placify practice question. Use the linked reference for concept revision; the question is not copied.",
+                CATALOG_DESCRIPTION,
                 topic,
                 "APTITUDE",
                 answer,
@@ -433,6 +457,7 @@ final class MockAssessmentCatalog {
                 .correctOption(String.valueOf((char) ('A' + correctIndex)))
                 .explanation(explanation)
                 .hint(hint)
+                .companyTags(COMPANY_PRACTICE_TAGS)
                 .externalLink(referenceFor(category))
                 .build();
     }

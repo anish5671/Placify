@@ -38,7 +38,6 @@ export default function QuestionBank() {
 
   // Filters
   const [category, setCategory] = useState('');
-  const [difficulty, setDifficulty] = useState('');
   const [company, setCompany] = useState('');
   const [search, setSearch] = useState('');
   const [onlyBookmarked, setOnlyBookmarked] = useState(false);
@@ -54,7 +53,7 @@ export default function QuestionBank() {
     setCurrentPage(1);
     fetchTopics();
     fetchQuestions();
-  }, [category, difficulty, company]);
+  }, [category, company]);
 
   const fetchTopics = async () => {
     try {
@@ -72,7 +71,6 @@ export default function QuestionBank() {
       setLoading(true);
       const params = {};
       if (category) params.category = category;
-      if (difficulty) params.difficulty = difficulty;
       if (company) params.company = company;
       if (search) params.search = search;
 
@@ -218,21 +216,6 @@ export default function QuestionBank() {
             <option value="DSA">DSA</option>
           </select>
 
-          {/* Difficulty Dropdown */}
-          <select
-            value={difficulty}
-            onChange={(e) => {
-              setSelectedBankId('');
-              setDifficulty(e.target.value);
-            }}
-            className="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs font-semibold text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-          >
-            <option value="">All Difficulties</option>
-            <option value="EASY">Easy</option>
-            <option value="MEDIUM">Medium</option>
-            <option value="HARD">Hard</option>
-          </select>
-
           {/* Company Tag Filter */}
           <select
             value={company}
@@ -275,7 +258,7 @@ export default function QuestionBank() {
         </div>
       </div>
 
-      {!category && !difficulty && !company && !search && !onlyBookmarked && !loading && !loadError && (
+      {!category && !company && !search && !onlyBookmarked && !loading && !loadError && (
         <section className="space-y-4">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
@@ -399,13 +382,6 @@ export default function QuestionBank() {
                   <div className="space-y-1.5 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="text-xs font-black text-indigo-400">#{(activePage - 1) * QUESTIONS_PER_PAGE + idx + 1}</span>
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider ${
-                        q.difficulty === 'HARD' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' :
-                        q.difficulty === 'MEDIUM' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
-                        'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                      }`}>
-                        {q.difficulty}
-                      </span>
                       <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300">
                         {q.category}
                       </span>
@@ -509,10 +485,10 @@ export default function QuestionBank() {
                 <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-800/80">
                   {/* Company tags */}
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <span className="text-[10px] text-slate-400 font-semibold">Asked in:</span>
+                    <span className="text-[10px] text-slate-400 font-semibold">Company-style practice:</span>
                     {q.companyTags?.split(',').map(tag => (
                       <span key={tag} className="px-2 py-0.5 rounded-md bg-slate-800 text-[10px] font-bold text-slate-300">
-                        {tag.trim()}
+                        [{tag.trim()}]
                       </span>
                     ))}
                   </div>
@@ -547,8 +523,8 @@ export default function QuestionBank() {
 
                     {q.externalLink && (
                       <div className="flex items-center gap-2">
-                        {q.description?.startsWith('Original Placify practice question.') && (
-                          <span className="text-[10px] text-slate-500">Original question · concept reference:</span>
+                        {q.description?.startsWith('Original company-style practice question.') && (
+                          <span className="text-[10px] text-slate-500">Concept reference (not a verified PYQ):</span>
                         )}
                         <a
                           href={q.externalLink}

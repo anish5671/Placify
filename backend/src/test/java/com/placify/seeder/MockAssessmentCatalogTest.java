@@ -60,11 +60,13 @@ class MockAssessmentCatalogTest {
 
         assertTrue(aptitudeQuestions.get(0).getTitle().contains("successive discounts"));
         assertTrue(aptitudeQuestions.stream().allMatch(question ->
-                question.getDescription().startsWith("Original Placify practice question.")
+                question.getDescription().startsWith("Original company-style practice question.")
+                        && question.getCompanyTags().equals("Amazon,Infosys,Accenture,Google,Microsoft")
                         && question.getExternalLink().startsWith("https://www.indiabix.com/")));
         assertTrue(coreQuestions.get(0).getTitle().contains("volatile"));
         assertTrue(coreQuestions.stream().allMatch(question ->
-                question.getDescription().startsWith("Original Placify practice question.")
+                question.getDescription().startsWith("Original company-style practice question.")
+                        && question.getCompanyTags().equals("Amazon,Infosys,Accenture,Google,Microsoft")
                         && question.getExternalLink().startsWith("https://www.geeksforgeeks.org/")));
     }
 
