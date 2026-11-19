@@ -32,3 +32,4 @@ public class CustomUserDetailsService implements UserDetailsService {
         return UserPrincipal.create(user);
     }
 }
+//"Fix authentication token handling in backend"
