@@ -118,7 +118,7 @@ docker compose down --remove-orphans
 docker compose up --build
 ```
 
-Open `http://localhost:5173`. The backend is available at `http://localhost:8080`. PostgreSQL is only reachable by the Compose services, not exposed on a host port. The named PostgreSQL volume preserves data when containers stop or are rebuilt. The old MySQL volume is not automatically converted or deleted; the new PostgreSQL database starts with the application's seeded data. Stop services with `Ctrl+C`, or run `docker compose down`. **Do not use `docker compose down -v` unless you intend to delete the PostgreSQL data volume.**
+Open `http://localhost:5173`. The frontend calls the local backend at `http://localhost:8080/api` by default. If your existing `.env` still sets `VITE_API_BASE_URL` to a hosted backend, change it to `http://localhost:8080/api` for local Compose runs. The backend is available at `http://localhost:8080`. PostgreSQL is only reachable by the Compose services, not exposed on a host port. The named PostgreSQL volume preserves data when containers stop or are rebuilt. The old MySQL volume is not automatically converted or deleted; the new PostgreSQL database starts with the application's seeded data. Stop services with `Ctrl+C`, or run `docker compose down`. **Do not use `docker compose down -v` unless you intend to delete the PostgreSQL data volume.**
 
 The database seeds the question banks and mock tests when the backend starts. Question seeding is repeatable and fills missing catalog questions without deleting existing user progress. A first run builds the images and downloads dependencies, so it may take a few minutes.
 
@@ -183,7 +183,7 @@ The repository includes a GitHub Actions workflow at `.github/workflows/ci.yml` 
    - `GEMINI_MODEL`: configurable Gemini model name; defaults to `gemini-2.5-flash`.
    - `GEMINI_BASE_URL`: defaults to `https://generativelanguage.googleapis.com`.
    - `RESUME_MAX_FILE_SIZE_BYTES`: upload limit, default `10485760` (10 MB).
-4. The health check uses `GET /api/questions`. After the first Vercel deployment, set `APP_CORS_ALLOWED_ORIGINS` to the actual Vercel production URL and redeploy the backend.
+4. The health check uses `GET /api/questions`. Deploy the latest backend revision so its `/api/auth/forgot-password` and `/api/auth/reset-password` endpoints are available. After the first Vercel deployment, set `APP_CORS_ALLOWED_ORIGINS` to the actual Vercel production URL and redeploy the backend.
 5. Resume analysis uses local PDF/DOCX extraction, skill/role matching, and checklist scoring. Gemini only provides optional written feedback; if Gemini is unavailable or returns 403, the local analysis and role matches still appear with an explicit AI status.
 6. To enable Gemini feedback, create a key in Google AI Studio, confirm the Generative Language API and selected model are available to its project, and set `GEMINI_API_KEY` in Render's backend environment. Keep the key out of Vercel, frontend variables, source files, screenshots, and Git. `GEMINI_MODEL` defaults to `gemini-2.5-flash`.
 
@@ -191,7 +191,7 @@ The repository includes a GitHub Actions workflow at `.github/workflows/ci.yml` 
 
 1. Import the same GitHub repository into Vercel and set **Root Directory** to `frontend`.
 2. Use build command `npm run build` and output directory `dist`.
-3. Set the Production environment variable `VITE_API_BASE_URL` to `https://<your-render-service>.onrender.com/api`. Do not add the Gemini key to Vercel; the browser calls the backend, which calls Gemini.
+3. Set the Production environment variable `VITE_API_BASE_URL` to the URL of the Render backend that has the latest code, ending in `/api` (for example, `https://<your-render-service>.onrender.com/api`). Redeploy Vercel after changing it. Do not add the Gemini key to Vercel; the browser calls the backend, which calls Gemini.
 4. The existing `frontend/vercel.json` rewrites SPA routes to `index.html`.
 
 ### Continuous integration and automatic deployments
