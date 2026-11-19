@@ -40,3 +40,4 @@ public class ResumeAnalysisService {
         );
     }
 }
+// "style(ui): refine button hover states and card spacing"
