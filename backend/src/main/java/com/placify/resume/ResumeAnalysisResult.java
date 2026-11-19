@@ -32,3 +32,4 @@ public record ResumeAnalysisResult(
             List<String> improvementSuggestions,
             String message) {}
 }
+//"feat(resume-analyzer): add file size validation feedback"
