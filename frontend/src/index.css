@@ -64,7 +64,8 @@
 
 /* White text utilities were authored for the previous dark surfaces. Keep headings and
    card content readable on the new light surfaces while preserving button contrast. 
-   Update dashboard layout and styling"*/
+   Update dashboard layout and styling
+   Add environment setup instructions to README*/
 .text-white:is(h1, h2, h3, h4, p, label, span, strong, td, th),
 h1 .text-white,
 h2 .text-white,
