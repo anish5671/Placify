@@ -5,7 +5,6 @@ import {
   Search, 
   Briefcase, 
   HelpCircle, 
-  Target, 
   ArrowRight, 
   Sparkles,
   Award,
@@ -177,10 +176,6 @@ export default function CompanyPrep() {
                   <span className="flex items-center gap-1 font-medium">
                     <HelpCircle className="w-3.5 h-3.5 text-indigo-400" />
                     <strong className="text-white">{company.questionCount}</strong> Questions
-                  </span>
-                  <span className="flex items-center gap-1 font-medium">
-                    <Target className="w-3.5 h-3.5 text-violet-400" />
-                    <strong className="text-white">{company.testCount}</strong> Mock Tests
                   </span>
                 </div>
               </div>

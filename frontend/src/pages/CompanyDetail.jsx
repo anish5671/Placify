@@ -8,14 +8,12 @@ import {
   Briefcase,
   CheckCircle2,
   ChevronDown,
-  Clock,
   Code2,
   ExternalLink,
   FileText,
   Filter,
   HelpCircle,
   Layers,
-  Play,
   Search,
   Sparkles,
   Target,
@@ -30,9 +28,9 @@ const TABS = [
   { id: 'roadmap', label: 'Roadmap', icon: FileText },
   { id: 'hiring', label: 'Hiring process', icon: Users },
   { id: 'questions', label: 'Question bank', icon: HelpCircle },
+  { id: 'dsa', label: 'DSA practice', icon: Code2 },
   { id: 'insights', label: 'Patterns & insights', icon: BarChart3 },
   { id: 'progress', label: 'My progress', icon: CheckCircle2 },
-  { id: 'tests', label: 'Mock tests', icon: Target },
 ];
 
 function Building2Icon(props) {
@@ -68,11 +66,11 @@ export default function CompanyDetail() {
   const { id } = useParams();
   const [company, setCompany] = useState(null);
   const [questions, setQuestions] = useState([]);
-  const [tests, setTests] = useState([]);
+  const [dsaQuestions, setDsaQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [questionError, setQuestionError] = useState('');
-  const [testError, setTestError] = useState('');
+  const [dsaQuestionError, setDsaQuestionError] = useState('');
   const [actionError, setActionError] = useState('');
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedRoleIndex, setSelectedRoleIndex] = useState(0);
@@ -83,6 +81,11 @@ export default function CompanyDetail() {
   const [questionType, setQuestionType] = useState('ALL');
   const [progressFilter, setProgressFilter] = useState('ALL');
   const [patternFilter, setPatternFilter] = useState('ALL');
+  const [dsaSearch, setDsaSearch] = useState('');
+  const [dsaTopic, setDsaTopic] = useState('ALL');
+  const [dsaDifficulty, setDsaDifficulty] = useState('ALL');
+  const [dsaProgress, setDsaProgress] = useState('ALL');
+  const [dsaPattern, setDsaPattern] = useState('ALL');
   const [revealedSolutions, setRevealedSolutions] = useState({});
   const [roadmapProgress, setRoadmapProgress] = useState({});
   const [progressError, setProgressError] = useState('');
@@ -93,10 +96,9 @@ export default function CompanyDetail() {
     .map((title) => ({ title: title.trim(), package: 'Compensation not specified in the company catalog; check the current listing.', tier: 'entry', focus: 'Build role-relevant fundamentals and verify the current hiring notice.' }));
   const role = roles[selectedRoleIndex] || roles[0];
   const roadmap = useMemo(() => getRoadmap(role), [role]);
-  const dsaQuestions = useMemo(() => questions.filter((question) => question.category === 'DSA'), [questions]);
   const topics = useMemo(
-    () => [...new Set(questions.map((question) => question.topicName).filter(Boolean))].sort(),
-    [questions],
+    () => [...new Set([...questions, ...dsaQuestions].map((question) => question.topicName).filter(Boolean))].sort(),
+    [questions, dsaQuestions],
   );
 
   useEffect(() => {
@@ -105,11 +107,11 @@ export default function CompanyDetail() {
       setLoading(true);
       setLoadError('');
       setQuestionError('');
-      setTestError('');
+      setDsaQuestionError('');
       setActionError('');
       setCompany(null);
       setQuestions([]);
-      setTests([]);
+      setDsaQuestions([]);
       setActiveTab('overview');
       setSelectedRoleIndex(0);
       try {
@@ -121,9 +123,9 @@ export default function CompanyDetail() {
         const currentCompany = companyResponse.data.data;
         setCompany(currentCompany);
 
-        const [questionResult, testResult] = await Promise.allSettled([
+        const [questionResult, dsaQuestionResult] = await Promise.allSettled([
           api.get(`/companies/${id}/questions`),
-          api.get(`/companies/${id}/tests`),
+          api.get('/questions/dsa'),
         ]);
         if (!active) return;
 
@@ -135,12 +137,12 @@ export default function CompanyDetail() {
             : 'The question service returned an unsuccessful response.');
         }
 
-        if (testResult.status === 'fulfilled' && testResult.value.data.success) {
-          setTests(testResult.value.data.data || []);
+        if (dsaQuestionResult.status === 'fulfilled' && dsaQuestionResult.value.data.success) {
+          setDsaQuestions(dsaQuestionResult.value.data.data || []);
         } else {
-          setTestError(testResult.status === 'rejected'
-            ? errorMessage(testResult.reason, 'Unable to load mock tests.')
-            : 'The mock-test service returned an unsuccessful response.');
+          setDsaQuestionError(dsaQuestionResult.status === 'rejected'
+            ? errorMessage(dsaQuestionResult.reason, 'Unable to load DSA practice questions.')
+            : 'The DSA question service returned an unsuccessful response.');
         }
 
         try {
@@ -193,6 +195,22 @@ export default function CompanyDetail() {
     return [...groups.entries()].sort(([first], [second]) => first.localeCompare(second));
   }, [dsaQuestions]);
 
+  const filteredDsaQuestions = useMemo(() => {
+    const query = dsaSearch.trim().toLowerCase();
+    return dsaQuestions.filter((question) => {
+      const matchesSearch = !query || [question.title, question.description, question.topicName]
+        .some((value) => value?.toLowerCase().includes(query));
+      const matchesTopic = dsaTopic === 'ALL' || question.topicName === dsaTopic;
+      const matchesDifficulty = dsaDifficulty === 'ALL' || question.difficulty === dsaDifficulty;
+      const matchesProgress = dsaProgress === 'ALL'
+        || (dsaProgress === 'SOLVED' && question.isSolved)
+        || (dsaProgress === 'UNSOLVED' && !question.isSolved)
+        || (dsaProgress === 'BOOKMARKED' && question.isBookmarked);
+      const matchesPattern = dsaPattern === 'ALL' || getQuestionPattern(question) === dsaPattern;
+      return matchesSearch && matchesTopic && matchesDifficulty && matchesProgress && matchesPattern;
+    });
+  }, [dsaQuestions, dsaSearch, dsaTopic, dsaDifficulty, dsaProgress, dsaPattern]);
+
   const solvedCount = questions.filter((question) => question.isSolved).length;
   const bookmarkedCount = questions.filter((question) => question.isBookmarked).length;
   const roadmapDoneCount = Object.values(roadmapProgress).filter(Boolean).length;
@@ -203,9 +221,11 @@ export default function CompanyDetail() {
     try {
       const response = await api.post(`/questions/${questionId}/${action}`);
       const nextState = response.data.data?.[field];
-      setQuestions((current) => current.map((question) => question.id === questionId
+      const updateQuestion = (current) => current.map((question) => question.id === questionId
         ? { ...question, [field]: typeof nextState === 'boolean' ? nextState : !question[field] }
-        : question));
+        : question);
+      setQuestions(updateQuestion);
+      setDsaQuestions(updateQuestion);
     } catch (error) {
       setActionError(errorMessage(error, `Unable to update ${field === 'isSolved' ? 'question progress' : 'bookmark'}. Please try again.`));
     }
@@ -245,6 +265,7 @@ export default function CompanyDetail() {
   const hiringRounds = company.hiringProcess?.split('\n').filter(Boolean) || [];
   const categories = [...new Set(questions.map((question) => question.category).filter(Boolean))].sort();
   const questionTypes = [...new Set(questions.map((question) => question.questionType).filter(Boolean))].sort();
+  const dsaTopics = [...new Set(dsaQuestions.map((question) => question.topicName).filter(Boolean))].sort();
 
   return (
     <div className="space-y-6">
@@ -490,22 +511,57 @@ export default function CompanyDetail() {
         </div>
       )}
 
+      {activeTab === 'dsa' && (
+        <div className="space-y-4">
+          <Notice tone="amber">Practice problems from the general DSA catalog. Company tags, where present, are not evidence that a company asked a particular question.</Notice>
+          {dsaQuestionError && <Notice tone="rose"><span role="alert">{dsaQuestionError}</span></Notice>}
+          {actionError && <Notice tone="rose"><span role="alert">{actionError}</span></Notice>}
+          <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <label className="relative sm:col-span-2 lg:col-span-3">
+              <span className="sr-only">Search DSA practice questions</span>
+              <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
+              <input value={dsaSearch} onChange={(event) => setDsaSearch(event.target.value)} placeholder="Search title, topic, or question text..."
+                className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40" />
+            </label>
+            <SelectFilter label="Topic" value={dsaTopic} onChange={setDsaTopic} options={['ALL', ...dsaTopics]} />
+            <SelectFilter label="Difficulty" value={dsaDifficulty} onChange={setDsaDifficulty} options={['ALL', 'EASY', 'MEDIUM', 'HARD']} />
+            <SelectFilter label="Progress" value={dsaProgress} onChange={setDsaProgress} options={['ALL', 'SOLVED', 'UNSOLVED', 'BOOKMARKED']} />
+            <SelectFilter label="DSA pattern" value={dsaPattern} onChange={setDsaPattern} options={['ALL', ...patternGroups.map(([name]) => name)]} />
+          </div>
+          <p className="text-xs text-slate-400">Showing <strong className="text-white">{filteredDsaQuestions.length}</strong> of {dsaQuestions.length} DSA practice questions</p>
+          {filteredDsaQuestions.length ? (
+            <div className="space-y-4">
+              {filteredDsaQuestions.map((question, index) => (
+                <QuestionCard key={question.id} question={question} index={index}
+                  revealed={Boolean(revealedSolutions[question.id])}
+                  onReveal={() => setRevealedSolutions((current) => ({ ...current, [question.id]: !current[question.id] }))}
+                  onBookmark={() => toggleQuestionState(question.id, 'bookmark', 'isBookmarked')}
+                  onSolve={() => toggleQuestionState(question.id, 'solve', 'isSolved')} />
+              ))}
+            </div>
+          ) : !dsaQuestionError ? (
+            <EmptyState title={dsaQuestions.length ? 'No questions match these filters' : 'No DSA practice questions available'}
+              detail={dsaQuestions.length ? 'Try broadening your search or clearing one of the filters.' : 'The DSA practice catalog could not be found.'} />
+          ) : null}
+        </div>
+      )}
+
       {activeTab === 'insights' && (
         <div className="grid lg:grid-cols-3 gap-5">
           <div className="lg:col-span-2 space-y-5">
-            <SectionCard title="DSA patterns represented in the tagged catalog" icon={Code2}>
-              <p className="text-xs text-slate-400">Pattern grouping is inferred from question titles and topic labels for navigation. It is not evidence that the company asked those questions.</p>
+            <SectionCard title="DSA practice patterns" icon={Code2}>
+              <p className="text-xs text-slate-400">Pattern grouping is inferred from titles and topic labels in the general DSA practice catalog. It is not company-specific or evidence that a company asked these questions.</p>
               {patternGroups.length ? (
                 <div className="grid sm:grid-cols-2 gap-3">
                   {patternGroups.map(([name, groupQuestions]) => (
-                    <button key={name} onClick={() => { setPatternFilter(name); setCategory('ALL'); setActiveTab('questions'); }}
+                    <button key={name} onClick={() => { setDsaPattern(name); setActiveTab('dsa'); }}
                       className="text-left p-4 rounded-2xl bg-slate-950/60 border border-slate-800 hover:border-indigo-500/40">
                       <div className="flex justify-between gap-3"><span className="text-sm font-bold text-white">{name}</span><span className="text-xs text-indigo-300">{groupQuestions.length} catalog {groupQuestions.length === 1 ? 'item' : 'items'}</span></div>
-                      <p className="text-[11px] text-slate-500 mt-2">Select to practice this tagged group</p>
+                      <p className="text-[11px] text-slate-500 mt-2">Select to practice this DSA group</p>
                     </button>
                   ))}
                 </div>
-              ) : <EmptyState title="No tagged DSA questions" detail="This catalog has no company-tagged DSA entries yet." />}
+              ) : <EmptyState title="No DSA practice questions" detail="The general DSA practice catalog is currently empty." />}
             </SectionCard>
             <SectionCard title="Preparation priorities for this track" icon={Sparkles}>
               <RoleSelector roles={roles} selectedIndex={selectedRoleIndex} onChange={setSelectedRoleIndex} />
@@ -517,8 +573,8 @@ export default function CompanyDetail() {
           </div>
           <div className="space-y-5">
             <SectionCard title="Catalog coverage (not hiring frequency)" icon={BarChart3}>
-              <Stat label="Tagged question sample" value={questions.length} />
-              {Object.entries(questions.reduce((counts, question) => {
+              <Stat label="DSA practice questions" value={dsaQuestions.length} />
+              {Object.entries(dsaQuestions.reduce((counts, question) => {
                 const key = question.topicName || question.category || 'Uncategorized';
                 counts[key] = (counts[key] || 0) + 1;
                 return counts;
@@ -555,35 +611,6 @@ export default function CompanyDetail() {
         </div>
       )}
 
-      {activeTab === 'tests' && (
-        <div className="space-y-4">
-          {testError && <Notice tone="rose"><span role="alert">{testError}</span></Notice>}
-          {tests.length ? (
-            <div className="grid md:grid-cols-2 gap-4">
-              {tests.map((test) => (
-                <article key={test.id} className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-4 flex flex-col justify-between">
-                  <div>
-                    <div className="flex justify-between gap-3 mb-2"><Badge tone="indigo">{test.category}</Badge><span className="text-xs text-slate-400">{test.difficulty}</span></div>
-                    <h3 className="text-base font-bold text-white">{test.title}</h3>
-                    <p className="text-xs text-slate-300 mt-1">{test.description}</p>
-                    <div className="flex flex-wrap gap-4 text-xs text-slate-400 mt-4 pt-3 border-t border-slate-800">
-                      <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-indigo-400" /> {test.durationMinutes} min</span>
-                      <span className="flex items-center gap-1"><HelpCircle className="w-3.5 h-3.5 text-indigo-400" /> {test.totalQuestions} questions</span>
-                      <span className="flex items-center gap-1"><Award className="w-3.5 h-3.5 text-indigo-400" /> {test.totalMarks} marks</span>
-                    </div>
-                  </div>
-                  <Link to={`/tests/${test.id}/exam`} className="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-2">
-                    <Play className="w-3.5 h-3.5 fill-white" /> Start mock exam
-                  </Link>
-                </article>
-              ))}
-            </div>
-          ) : !testError ? (
-            <EmptyState title="No company-specific mock tests yet" detail="Browse the available assessments for general aptitude and core CS practice."
-              action={<Link to="/tests" className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold">Browse all mock tests</Link>} />
-          ) : null}
-        </div>
-      )}
     </div>
   );
 }
