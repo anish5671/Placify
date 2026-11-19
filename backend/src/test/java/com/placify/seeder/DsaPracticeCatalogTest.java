@@ -17,13 +17,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class DsaPracticeCatalogTest {
 
     @Test
-    void catalogProvidesUniqueQuestionsAcrossElevenModulesWithFifteenProblemsEach() {
+    void catalogProvidesUniqueQuestionsAcrossElevenModulesWithTwentyProblemsEach() {
         Map<String, com.placify.question.Topic> moduleTopics = new HashMap<>();
         DsaPracticeCatalog.createModuleTopics().forEach(topic ->
                 moduleTopics.put(topic.getSlug().substring("dsa-".length()), topic));
         List<Question> questions = DsaPracticeCatalog.createQuestions(moduleTopics);
 
-        assertEquals(157, questions.size());
+        assertEquals(212, questions.size());
         assertEquals(11, DsaPracticeCatalog.MODULES.size());
         assertEquals(DsaPracticeCatalog.TARGET_SIZE, questions.size() + 8);
 
@@ -47,7 +47,7 @@ class DsaPracticeCatalogTest {
         );
         for (DsaPracticeCatalog.Module module : DsaPracticeCatalog.MODULES) {
             String topicSlug = "dsa-" + module.slug();
-            assertEquals(15L, countsByTopic.getOrDefault(topicSlug, 0L)
+            assertEquals(20L, countsByTopic.getOrDefault(topicSlug, 0L)
                     + legacyQuestionsByModule.getOrDefault(topicSlug, 0L), module.name());
         }
 

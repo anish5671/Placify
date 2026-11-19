@@ -11,7 +11,7 @@ import java.util.stream.IntStream;
 
 final class DsaPracticeCatalog {
 
-    static final int TARGET_SIZE = 165;
+    static final int TARGET_SIZE = 220;
     private static final String COMPANY_TAGS = "Amazon,Google,Microsoft,TCS";
     static final List<Module> MODULES = List.of(
             new Module("arrays", "Arrays & Hashing"),
@@ -69,6 +69,63 @@ final class DsaPracticeCatalog {
     );
     private static final List<String> NEW_BINARY_SEARCH_TITLES = List.of(
             "Search Insert Position", "Find K Closest Elements", "Find the First Bad Version"
+    );
+    private static final Map<String, String> ADDITIONAL_MODULE_BY_TITLE = Map.ofEntries(
+            Map.entry("Majority Element II", "arrays"),
+            Map.entry("Merge Intervals", "arrays"),
+            Map.entry("Next Permutation", "arrays"),
+            Map.entry("Set Matrix Zeroes", "arrays"),
+            Map.entry("Find the Missing and Repeating Number", "arrays"),
+            Map.entry("Longest Common Prefix", "strings"),
+            Map.entry("Find the Index of the First Occurrence in a String", "strings"),
+            Map.entry("Isomorphic Strings", "strings"),
+            Map.entry("Longest Substring with At Most K Distinct Characters", "strings"),
+            Map.entry("Minimum Insertions to Make a String Palindrome", "strings"),
+            Map.entry("3Sum Closest", "two-pointers"),
+            Map.entry("Remove Duplicates from Sorted Array II", "two-pointers"),
+            Map.entry("Fruit Into Baskets", "two-pointers"),
+            Map.entry("Longest Subarray of 1s After Deleting One Element", "two-pointers"),
+            Map.entry("Minimum Window Subsequence", "two-pointers"),
+            Map.entry("Next Greater Element I", "stack-queue"),
+            Map.entry("Online Stock Span", "stack-queue"),
+            Map.entry("Implement Queue using Stacks", "stack-queue"),
+            Map.entry("Implement Stack using Queues", "stack-queue"),
+            Map.entry("Asteroid Collision", "stack-queue"),
+            Map.entry("Odd Even Linked List", "linked-list"),
+            Map.entry("Delete Node in a Linked List", "linked-list"),
+            Map.entry("Flatten a Multilevel Doubly Linked List", "linked-list"),
+            Map.entry("Swap Nodes in Pairs", "linked-list"),
+            Map.entry("Remove Duplicates from Sorted List II", "linked-list"),
+            Map.entry("Allocate Books", "binary-search"),
+            Map.entry("Aggressive Cows", "binary-search"),
+            Map.entry("Kth Element of Two Sorted Arrays", "binary-search"),
+            Map.entry("Kth Missing Positive Number", "binary-search"),
+            Map.entry("Painter's Partition Problem", "binary-search"),
+            Map.entry("Binary Tree Boundary Traversal", "trees"),
+            Map.entry("Vertical Order Traversal of a Binary Tree", "trees"),
+            Map.entry("Check Completeness of a Binary Tree", "trees"),
+            Map.entry("Construct BST from Preorder", "trees"),
+            Map.entry("Implement Trie Prefix Tree", "trees"),
+            Map.entry("Meeting Rooms II", "heaps"),
+            Map.entry("Minimum Platforms", "heaps"),
+            Map.entry("Fractional Knapsack", "heaps"),
+            Map.entry("Reorganize String", "heaps"),
+            Map.entry("Maximum Sum Combination", "heaps"),
+            Map.entry("0/1 Knapsack", "dynamic-programming"),
+            Map.entry("Rod Cutting", "dynamic-programming"),
+            Map.entry("Minimum Cost to Cut a Stick", "dynamic-programming"),
+            Map.entry("Maximum Sum Increasing Subsequence", "dynamic-programming"),
+            Map.entry("Count Square Submatrices with All Ones", "dynamic-programming"),
+            Map.entry("Rat in a Maze", "backtracking"),
+            Map.entry("M-Coloring Problem", "backtracking"),
+            Map.entry("Restore IP Addresses", "backtracking"),
+            Map.entry("Matchsticks to Square", "backtracking"),
+            Map.entry("Permutation Sequence", "backtracking"),
+            Map.entry("Dijkstra's Algorithm", "graphs"),
+            Map.entry("Bellman-Ford Algorithm", "graphs"),
+            Map.entry("Bipartite Graph Check", "graphs"),
+            Map.entry("Minimum Spanning Tree", "graphs"),
+            Map.entry("Alien Dictionary", "graphs")
     );
 
     private DsaPracticeCatalog() {
@@ -131,6 +188,8 @@ final class DsaPracticeCatalog {
         if (NEW_BINARY_SEARCH_TITLES.contains(title)) return "binary-search";
         if (NEW_STRING_TITLES.contains(title)) return "strings";
         if (NEW_TWO_POINTER_TITLES.contains(title)) return "two-pointers";
+        String additionalModule = ADDITIONAL_MODULE_BY_TITLE.get(title);
+        if (additionalModule != null) return additionalModule;
 
         if (index < 18) return "arrays";
         if (index < 31) return "strings";
@@ -308,7 +367,62 @@ final class DsaPracticeCatalog {
             p("Rotate List", "MEDIUM", "Rotate a linked list to the right by k places.", "Connect the tail to the head to form a cycle, then break it at the new tail after reducing k modulo the list length.", "The new tail is length-k-1 steps from the old head. Handle empty lists and zero effective rotations before forming the cycle."),
             p("Search Insert Position", "EASY", "Return the index where a target belongs in a sorted array, whether or not it is present.", "Binary-search for the lower bound: the first index whose value is not less than the target.", "The lower-bound invariant narrows the insertion point in O(log n) time."),
             p("Find K Closest Elements", "MEDIUM", "Return the k values closest to x in a sorted array, breaking ties toward the smaller value.", "Binary-search the left edge of a length-k window; compare the values just outside each candidate window.", "The best window is contiguous in a sorted array, and the comparison eliminates half the possible starts each step."),
-            p("Find the First Bad Version", "EASY", "Find the first bad version when versions are ordered and every version after it is also bad.", "Binary-search the first true result of the monotonic good/bad predicate.", "The predicate changes from false to true once, so lower-bound binary search finds the transition in O(log n) calls.")
+            p("Find the First Bad Version", "EASY", "Find the first bad version when versions are ordered and every version after it is also bad.", "Binary-search the first true result of the monotonic good/bad predicate.", "The predicate changes from false to true once, so lower-bound binary search finds the transition in O(log n) calls."),
+            p("Majority Element II", "MEDIUM", "Return all values that occur more than one third of the time in an integer array.", "Use the extended Boyer-Moore vote algorithm to track at most two candidates, then verify their counts.", "At most two values can exceed n/3 occurrences. Candidate elimination finds them in O(n) time and O(1) extra space."),
+            p("Merge Intervals", "MEDIUM", "Combine all overlapping intervals and return the resulting non-overlapping ranges.", "Sort intervals by start and extend the last output interval whenever the next one overlaps.", "After sorting, an interval can overlap only the most recently merged range. Time is O(n log n)."),
+            p("Next Permutation", "MEDIUM", "Rearrange a sequence into its next lexicographically greater permutation, wrapping to the smallest order if needed.", "Find the rightmost ascending pivot, swap with its next larger suffix value, then reverse the suffix.", "The suffix is non-increasing; reversing it after the pivot swap gives the smallest possible larger arrangement."),
+            p("Set Matrix Zeroes", "MEDIUM", "If a matrix cell is zero, set its entire row and column to zero in-place.", "Use the first row and column as marker storage, while separately remembering whether either originally contained zero.", "Markers preserve the original zero locations without a second matrix, giving O(1) auxiliary space."),
+            p("Find the Missing and Repeating Number", "MEDIUM", "An array should contain every value from 1 through n once, but one value is missing and another repeats; identify both.", "Use a frequency array, or derive the two values from the sum and squared-sum differences.", "The expected sum and square sum provide two equations for the missing and repeated values; verify bounds and handle large arithmetic safely."),
+            p("Longest Common Prefix", "EASY", "Find the longest prefix shared by every string in a list.", "Compare characters across strings from the first position until a mismatch or the shortest string ends.", "The first mismatch ends the common prefix; the scan takes O(total characters) time."),
+            p("Find the Index of the First Occurrence in a String", "EASY", "Return the first position where a pattern occurs in a text, or -1 if it does not occur.", "Use the Knuth-Morris-Pratt prefix function to search in O(n+m) time.", "The prefix table reuses matched pattern information after a mismatch instead of restarting comparisons."),
+            p("Isomorphic Strings", "EASY", "Determine whether characters in one string can be consistently replaced one-to-one to form another string.", "Track forward and reverse character mappings while scanning both strings.", "Both mappings are required to prevent two source characters from mapping to the same target character."),
+            p("Longest Substring with At Most K Distinct Characters", "MEDIUM", "Find the length of the longest substring containing no more than k distinct characters.", "Maintain character frequencies in a sliding window and shrink until its distinct count is at most k.", "Each character enters and leaves the window at most once, so the scan is O(n)."),
+            p("Minimum Insertions to Make a String Palindrome", "HARD", "Find the minimum number of character insertions needed to make a string a palindrome.", "Compute the longest palindromic subsequence; the answer is string length minus that subsequence length.", "Characters in the longest palindromic subsequence can remain in place; insertions are needed only for the rest."),
+            p("3Sum Closest", "MEDIUM", "Find three values whose sum is closest to a target and return that sum.", "Sort, fix one value, then move two pointers according to whether the current sum is below or above target.", "For each fixed value, the two-pointer scan examines promising sums in O(n); total time is O(n^2)."),
+            p("Remove Duplicates from Sorted Array II", "MEDIUM", "Remove duplicates in-place from a sorted array while allowing each value to appear at most twice.", "Use a write pointer and accept a value only when it differs from the value two kept positions earlier.", "Sorted order groups duplicates together; comparing with the last two kept values enforces the limit in O(n) time."),
+            p("Fruit Into Baskets", "MEDIUM", "Find the longest contiguous segment containing at most two distinct fruit types.", "Use a sliding window with counts and shrink it whenever a third type enters.", "The frequency map keeps the window valid; every index advances at most twice for O(n) time."),
+            p("Longest Subarray of 1s After Deleting One Element", "MEDIUM", "Find the longest run of ones obtainable after deleting exactly one element from a binary array.", "Use a sliding window containing at most one zero and count its length minus one.", "The one-zero window represents the best segment after deleting its zero, or one element when the window has none."),
+            p("Minimum Window Subsequence", "HARD", "Find the shortest substring of a source that contains a target as a subsequence in order.", "Scan forward to complete the target, then move backward to shrink each valid window.", "Greedy forward and backward passes locate a minimal window for each completion without storing all subsequences."),
+            p("Next Greater Element I", "EASY", "For each value in one array, find the first greater value to its right in a second array.", "Use a decreasing monotonic stack over the second array and store each value's next greater result.", "When a larger value arrives, it resolves all smaller values at the stack top in linear total time."),
+            p("Online Stock Span", "MEDIUM", "For each new stock price, report the number of consecutive prior days with price no greater than today's.", "Maintain a decreasing stack of price and accumulated span pairs, popping all smaller or equal prices.", "Popped spans combine with today's span, so each price is pushed and popped once."),
+            p("Implement Queue using Stacks", "EASY", "Implement FIFO queue operations using only stack operations.", "Use an input stack for pushes and transfer to an output stack only when the output stack is empty.", "Each item moves between stacks at most once, giving amortized O(1) operations."),
+            p("Implement Stack using Queues", "EASY", "Implement LIFO stack operations using queue operations.", "After adding an item, rotate the prior queue contents behind it so the newest item is at the front.", "Keeping the newest item at the front makes pop and top constant time; push is linear."),
+            p("Asteroid Collision", "MEDIUM", "Simulate asteroids moving in opposite directions; colliding asteroids destroy the smaller one, or both if equal.", "Use a stack and resolve collisions only when a right-moving asteroid meets a left-moving one.", "The stack stores surviving asteroids in order; each asteroid is pushed once and removed at most once."),
+            p("Odd Even Linked List", "MEDIUM", "Group nodes at odd indices followed by nodes at even indices while preserving each group order.", "Maintain separate odd and even chains and connect the odd tail to the even head.", "Rewiring two running tails preserves relative order and uses O(1) extra space."),
+            p("Delete Node in a Linked List", "MEDIUM", "Delete a given non-tail node when the list head is not provided.", "Copy the next node's value into the given node and bypass the next node.", "The following node supplies the value and link to retain; the operation is impossible for a tail node."),
+            p("Flatten a Multilevel Doubly Linked List", "MEDIUM", "Flatten a doubly linked list whose nodes may have child lists into one level in depth-first order.", "Traverse nodes and splice each child list between its parent and the parent's former successor.", "Save and reconnect both next and prev links at each splice; a stack can defer the original successor."),
+            p("Swap Nodes in Pairs", "MEDIUM", "Swap each adjacent pair of nodes in a singly linked list without changing node values.", "Use a sentinel and rewire each complete pair before advancing to the next pair.", "The sentinel handles swapping at the head; an unmatched final node remains in place."),
+            p("Remove Duplicates from Sorted List II", "MEDIUM", "Remove every value that occurs more than once in a sorted linked list, keeping only values that appeared once.", "Use a sentinel and skip each entire run when the current value repeats.", "Sorted order makes each duplicate run contiguous, so one pass can unlink all repeated nodes."),
+            p("Allocate Books", "HARD", "Allocate contiguous book pages among students so the maximum pages assigned to anyone is minimized.", "Binary-search the maximum allowed pages and greedily count the students needed for that bound.", "Feasibility is monotonic as the page limit increases; reject when students exceed the available count."),
+            p("Aggressive Cows", "HARD", "Place a fixed number of cows in stalls to maximize the minimum distance between any two placed cows.", "Sort stall positions and binary-search the distance, greedily placing each next cow as early as possible.", "If a distance is feasible, every smaller distance is feasible too, enabling binary search."),
+            p("Kth Element of Two Sorted Arrays", "HARD", "Find the kth smallest value across two sorted arrays without merging them.", "Binary-search a partition in the shorter array so exactly k elements lie on the left.", "A valid partition has each left boundary no greater than the opposite right boundary; it is found in O(log min(n,m))."),
+            p("Kth Missing Positive Number", "EASY", "Find the kth positive integer missing from a strictly increasing array of positive values.", "Binary-search the first index where the number of missing values before it reaches k.", "At index i, the count of missing positives is array[i]-i-1, a monotonic function."),
+            p("Painter's Partition Problem", "HARD", "Assign contiguous boards to painters in order while minimizing the maximum total length assigned to one painter.", "Binary-search the maximum workload and greedily count how many painters are required.", "The number of required painters decreases as the workload limit grows, making feasibility monotonic."),
+            p("Binary Tree Boundary Traversal", "MEDIUM", "Return a binary tree's boundary in anti-clockwise order without repeating nodes.", "Collect the root, non-leaf left boundary, all leaves, then the reversed non-leaf right boundary.", "Separating the four traversal parts and excluding leaves from side boundaries prevents duplicates."),
+            p("Vertical Order Traversal of a Binary Tree", "HARD", "Group tree nodes by vertical column, sorting ties by row and then value.", "Traverse with row and column coordinates, store nodes by coordinate, and sort ties before emitting columns.", "Coordinates determine column and depth; tie sorting enforces the required deterministic order."),
+            p("Check Completeness of a Binary Tree", "MEDIUM", "Determine whether every level of a binary tree is full except possibly the last, which must be filled left to right.", "Run level-order traversal and reject any non-null node appearing after the first missing child slot.", "Completeness requires all later queue positions to be empty once a gap has appeared."),
+            p("Construct BST from Preorder", "MEDIUM", "Build a binary search tree from its preorder traversal.", "Recursively consume preorder values within exclusive lower and upper bounds.", "Each subtree is a contiguous preorder segment bounded by the BST ordering constraints."),
+            p("Implement Trie Prefix Tree", "MEDIUM", "Implement a trie supporting insertion, exact-word search, and prefix search.", "Store child links per character and mark terminal nodes for complete words.", "Each operation follows one path of length at most the input word length."),
+            p("Meeting Rooms II", "MEDIUM", "Find the minimum number of rooms required to hold all meeting intervals.", "Sort start times and use a min-heap of current meeting end times.", "Reuse a room when its earliest meeting ends before the next begins; heap size is the active room count."),
+            p("Minimum Platforms", "MEDIUM", "Find the minimum number of train platforms needed so no arriving train waits.", "Sort arrival and departure times and sweep both lists, incrementing on arrival and decrementing on departure.", "The maximum simultaneous trains equals the required platforms; process equal times consistently with interval conventions."),
+            p("Fractional Knapsack", "MEDIUM", "Maximize value in a capacity-limited knapsack when fractions of items may be taken.", "Sort items by value-to-weight ratio and take each greedily until capacity is filled.", "With divisible items, each unit of capacity should go to the highest remaining value density."),
+            p("Reorganize String", "MEDIUM", "Rearrange characters so no identical characters are adjacent, or report that it is impossible.", "Use a max-heap of character counts, temporarily holding the previously used character out of the heap.", "Always selecting the most frequent available character avoids stranding a larger remaining count."),
+            p("Maximum Sum Combination", "MEDIUM", "Find the k largest pair sums formed by choosing one value from each of two arrays.", "Sort both arrays and explore index pairs from the largest corner with a max-heap and visited set.", "Each popped pair reveals its next two neighbors; the visited set prevents duplicate index pairs."),
+            p("0/1 Knapsack", "MEDIUM", "Choose items with given weights and values to maximize value without exceeding capacity; each item can be used at most once.", "Use capacity DP updated in descending order for each item.", "Descending updates prevent an item from being reused in the same iteration; complexity is O(nW)."),
+            p("Rod Cutting", "MEDIUM", "Find the maximum revenue obtainable by cutting a rod into pieces with given prices by length.", "Use unbounded knapsack DP over rod lengths and try each first-cut size.", "Every length can be formed by a first piece plus an optimal remainder; the recurrence permits repeated piece lengths."),
+            p("Minimum Cost to Cut a Stick", "HARD", "Choose an order for specified cuts on a stick to minimize the total cost, where each cut costs the current segment length.", "Sort cut positions and use interval DP to try each cut as the first cut within an interval.", "After a cut, the left and right intervals become independent; the segment's length is paid once."),
+            p("Maximum Sum Increasing Subsequence", "MEDIUM", "Find the maximum possible sum of a strictly increasing subsequence.", "Use dynamic programming where each value extends the best-sum subsequence ending at a smaller prior value.", "For each index, compare its standalone value with extensions from all smaller previous values; O(n^2) time."),
+            p("Count Square Submatrices with All Ones", "MEDIUM", "Count every square submatrix containing only ones.", "For each one-cell, store one plus the minimum square size ending above, left, and diagonally above-left.", "The DP value is the side length of the largest all-one square ending at that cell; sum all values."),
+            p("Rat in a Maze", "MEDIUM", "List paths for a rat to travel from the top-left to bottom-right of a blocked grid without revisiting cells.", "Backtrack over allowed neighboring cells, marking the current path and undoing marks on return.", "The visited/path state prevents cycles; backtracking explores each valid route."),
+            p("M-Coloring Problem", "MEDIUM", "Determine whether an undirected graph can be colored with at most m colors so adjacent vertices differ.", "Assign colors recursively, checking each candidate against already colored neighbors.", "Backtracking abandons a color choice as soon as it conflicts and tries the next available color."),
+            p("Restore IP Addresses", "MEDIUM", "Insert three dots into a digit string to form all valid IPv4 addresses.", "Backtrack over segment lengths one through three, rejecting leading zeroes and values above 255.", "Exactly four valid segments must consume the entire input; pruning invalid prefixes limits the search."),
+            p("Matchsticks to Square", "MEDIUM", "Determine whether matchsticks with given lengths can be arranged into four equal-length sides without breaking any stick.", "Sort lengths descending and backtrack by placing each stick on a side whose current length does not exceed the target.", "Prune symmetric side choices and reject when total length is not divisible by four; each stick is assigned exactly once."),
+            p("Permutation Sequence", "HARD", "Return the kth permutation of the numbers 1 through n in lexicographic order.", "Use factorial number-system blocks to select each next value directly from the remaining sorted values.", "Each leading digit owns (n-1)! permutations; division and remainder identify the correct block and offset."),
+            p("Dijkstra's Algorithm", "MEDIUM", "Find shortest distances from one source in a weighted graph with non-negative edge weights.", "Use a min-priority queue and relax outgoing edges whenever a shorter distance is found.", "Non-negative weights ensure a node's smallest popped distance is final; complexity is O((V+E)log V)."),
+            p("Bellman-Ford Algorithm", "MEDIUM", "Find shortest paths from a source when edge weights may be negative, and detect reachable negative cycles.", "Relax every edge up to V-1 rounds, stopping early if no distance changes; perform one extra cycle check.", "Any shortest simple path uses at most V-1 edges; a further improvement indicates a reachable negative cycle."),
+            p("Bipartite Graph Check", "MEDIUM", "Determine whether an undirected graph can be divided into two sets with every edge crossing between them.", "Color each component with two colors using BFS or DFS and reject same-color adjacent vertices.", "A valid two-coloring exists exactly when the graph contains no odd-length cycle."),
+            p("Minimum Spanning Tree", "MEDIUM", "Connect every vertex of a connected weighted undirected graph with minimum total edge weight and no cycles.", "Use Kruskal's algorithm: sort edges and add each edge that joins different union-find components.", "The cut property makes the lightest eligible edge safe; union-find skips cycle-forming edges."),
+            p("Alien Dictionary", "HARD", "Infer a valid character order from a sorted list of words in an unknown alphabet, or detect inconsistency.", "Compare adjacent words to create the first differing-character edge, then topologically sort the graph.", "Only the first mismatch constrains order; a longer word before its exact prefix is invalid.")
     );
 
 

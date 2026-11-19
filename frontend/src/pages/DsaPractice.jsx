@@ -25,12 +25,6 @@ const MODULES = [
   { slug: 'graphs', name: 'Graphs' },
 ];
 
-const STUDY_REFERENCES = [
-  { label: 'Striver A2Z Sheet', href: 'https://takeuforward.org/strivers-a2z-dsa-course/strivers-a2z-dsa-course-sheet-2/' },
-  { label: 'LeetCode 75', href: 'https://leetcode.com/studyplan/leetcode-75/' },
-  { label: 'GeeksforGeeks DSA', href: 'https://www.geeksforgeeks.org/data-structures/' },
-];
-
 const getPracticeUrl = (problem) => (
   problem.externalLink
   || `https://leetcode.com/problemset/?search=${encodeURIComponent(problem.title)}`
@@ -102,7 +96,7 @@ export default function DsaPractice() {
             <span>DSA Practice Sheets</span>
           </h2>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            11 focused modules with 15 important pattern-based problems in each
+            11 focused modules with 20 important pattern-based problems in each, curated from LeetCode, GFG, and Striver practice patterns
           </p>
         </div>
 
@@ -115,27 +109,6 @@ export default function DsaPractice() {
           <div className="w-12 h-12 rounded-full bg-slate-950 border-2 border-indigo-500/40 flex items-center justify-center font-bold text-xs text-indigo-400">
             {progressPercent}%
           </div>
-        </div>
-      </div>
-
-      <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800">
-        <div className="text-sm font-bold text-white">Study references</div>
-        <p className="text-xs text-slate-400 mt-1">
-          Original practice summaries, organized by topic. These links are study resources; questions are not copied verbatim and company appearances are not verified.
-        </p>
-        <div className="flex flex-wrap gap-2 mt-3">
-          {STUDY_REFERENCES.map(reference => (
-            <a
-              key={reference.label}
-              href={reference.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950 text-indigo-300 border border-slate-800 text-xs font-semibold hover:bg-slate-800"
-            >
-              {reference.label}
-              <ExternalLink className="w-3 h-3" />
-            </a>
-          ))}
         </div>
       </div>
 
