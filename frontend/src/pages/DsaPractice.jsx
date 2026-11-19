@@ -7,7 +7,8 @@ import {
   Eye, 
   Sparkles, 
   Layers, 
-  X
+  X,
+  RefreshCw
 } from 'lucide-react';
 import api from '../api/client';
 
@@ -33,6 +34,7 @@ const getPracticeUrl = (problem) => (
 export default function DsaPractice() {
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [activeModalProblem, setActiveModalProblem] = useState(null);
 
@@ -43,12 +45,22 @@ export default function DsaPractice() {
   const fetchDsaQuestions = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/questions/dsa');
-      if (res.data.success) {
+      setLoadError('');
+      const res = await api.get('/questions/dsa', { timeout: 30000 });
+      if (res.data.success && Array.isArray(res.data.data)) {
         setQuestions(res.data.data);
+      } else {
+        setLoadError(res.data.message || 'The DSA questions could not be loaded.');
       }
     } catch (err) {
       console.error(err);
+      setLoadError(
+        err.code === 'ECONNABORTED'
+          ? 'The DSA server did not respond in time. Please try again.'
+          : err.response
+            ? `Could not load DSA questions (HTTP ${err.response.status}). Please try again.`
+            : 'Could not reach the DSA server. Please try again.'
+      );
     } finally {
       setLoading(false);
     }
@@ -116,6 +128,17 @@ export default function DsaPractice() {
         <div className="flex flex-col items-center justify-center min-h-[40vh] gap-3">
           <div className="w-10 h-10 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
           <p className="text-sm text-slate-400">Loading DSA practice sheet...</p>
+        </div>
+      ) : loadError ? (
+        <div role="alert" className="flex flex-col items-center justify-center min-h-[40vh] gap-4 rounded-3xl bg-slate-900/90 border border-slate-800 p-6 text-center">
+          <p className="text-sm text-rose-300">{loadError}</p>
+          <button
+            onClick={fetchDsaQuestions}
+            className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-bold text-white hover:bg-indigo-500"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Retry
+          </button>
         </div>
       ) : !selectedModule ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">

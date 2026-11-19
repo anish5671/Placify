@@ -10,4 +10,4 @@ FROM eclipse-temurin:21-jre
 WORKDIR /app
 COPY --from=build /workspace/target/placify-backend-1.0.0.jar app.jar
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+ENTRYPOINT ["java", "-XX:ActiveProcessorCount=1", "-XX:TieredStopAtLevel=1", "-XX:+UseSerialGC", "-jar", "/app/app.jar"]
