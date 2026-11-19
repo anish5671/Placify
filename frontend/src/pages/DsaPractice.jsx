@@ -7,11 +7,29 @@ import {
   Eye, 
   Sparkles, 
   Layers, 
-  X,
-  Clock,
-  HardDrive
+  X
 } from 'lucide-react';
 import api from '../api/client';
+
+const MODULES = [
+  { slug: 'arrays', name: 'Arrays & Hashing' },
+  { slug: 'strings', name: 'Strings & Backtracking' },
+  { slug: 'two-pointers', name: 'Two Pointers & Sliding Window' },
+  { slug: 'stack-queue', name: 'Stack & Queue' },
+  { slug: 'linked-list', name: 'Linked Lists' },
+  { slug: 'binary-search', name: 'Binary Search' },
+  { slug: 'trees', name: 'Trees & Tries' },
+  { slug: 'heaps', name: 'Heaps & Greedy' },
+  { slug: 'dynamic-programming', name: 'Dynamic Programming' },
+  { slug: 'backtracking', name: 'Backtracking & Recursion' },
+  { slug: 'graphs', name: 'Graphs' },
+];
+
+const STUDY_REFERENCES = [
+  { label: 'Striver A2Z Sheet', href: 'https://takeuforward.org/strivers-a2z-dsa-course/strivers-a2z-dsa-course-sheet-2/' },
+  { label: 'LeetCode 75', href: 'https://leetcode.com/studyplan/leetcode-75/' },
+  { label: 'GeeksforGeeks DSA', href: 'https://www.geeksforgeeks.org/data-structures/' },
+];
 
 const getPracticeUrl = (problem) => (
   problem.externalLink
@@ -21,15 +39,8 @@ const getPracticeUrl = (problem) => (
 export default function DsaPractice() {
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedTopic, setSelectedTopic] = useState('ALL');
-  const [selectedDifficulty, setSelectedDifficulty] = useState('ALL');
+  const [selectedTopic, setSelectedTopic] = useState(null);
   const [activeModalProblem, setActiveModalProblem] = useState(null);
-
-  const topicsList = [
-    { slug: 'ALL', name: 'All Topics' },
-    { slug: 'quant', name: 'Arrays & Math' },
-    { slug: 'dsa', name: 'Trees, DP, Graphs & Search' },
-  ];
 
   useEffect(() => {
     fetchDsaQuestions();
@@ -67,15 +78,16 @@ export default function DsaPractice() {
       const res = await api.post(`/questions/${qId}/bookmark`);
       const isBookmarked = res.data.data.isBookmarked;
       setQuestions(prev => prev.map(q => q.id === qId ? { ...q, isBookmarked } : q));
+      setActiveModalProblem(prev => (
+        prev?.id === qId ? { ...prev, isBookmarked } : prev
+      ));
     } catch (err) {
       console.error(err);
     }
   };
 
-  const filteredProblems = questions.filter(q => {
-    if (selectedDifficulty !== 'ALL' && q.difficulty !== selectedDifficulty) return false;
-    return true;
-  });
+  const selectedModule = MODULES.find(module => module.slug === selectedTopic);
+  const filteredProblems = questions.filter(q => q.topicName === selectedModule?.name);
 
   const totalSolved = questions.filter(q => q.isSolved).length;
   const progressPercent = questions.length > 0 ? Math.round((totalSolved / questions.length) * 100) : 0;
@@ -90,7 +102,7 @@ export default function DsaPractice() {
             <span>DSA Practice Sheets</span>
           </h2>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Hand-picked Data Structures & Algorithms challenges asked in Amazon, Google, Microsoft, and TCS Digital
+            11 focused modules with 15 important pattern-based problems in each
           </p>
         </div>
 
@@ -106,51 +118,91 @@ export default function DsaPractice() {
         </div>
       </div>
 
-      {/* Filter Controls */}
-      <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-2">
-          {['ALL', 'EASY', 'MEDIUM', 'HARD'].map(diff => (
-            <button
-              key={diff}
-              onClick={() => setSelectedDifficulty(diff)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                selectedDifficulty === diff
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
-                  : 'bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800'
-              }`}
+      <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800">
+        <div className="text-sm font-bold text-white">Study references</div>
+        <p className="text-xs text-slate-400 mt-1">
+          Original practice summaries, organized by topic. These links are study resources; questions are not copied verbatim and company appearances are not verified.
+        </p>
+        <div className="flex flex-wrap gap-2 mt-3">
+          {STUDY_REFERENCES.map(reference => (
+            <a
+              key={reference.label}
+              href={reference.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950 text-indigo-300 border border-slate-800 text-xs font-semibold hover:bg-slate-800"
             >
-              {diff === 'ALL' ? 'All Difficulties' : diff}
-            </button>
+              {reference.label}
+              <ExternalLink className="w-3 h-3" />
+            </a>
           ))}
-        </div>
-
-        <div className="text-xs text-slate-400 font-medium">
-          Showing <span className="text-white font-bold">{filteredProblems.length}</span> Coding Problems
         </div>
       </div>
 
-      {/* Problems Table / List */}
       {loading ? (
         <div className="flex flex-col items-center justify-center min-h-[40vh] gap-3">
           <div className="w-10 h-10 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
           <p className="text-sm text-slate-400">Loading DSA practice sheet...</p>
         </div>
+      ) : !selectedModule ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+          {MODULES.map(module => {
+            const moduleQuestions = questions.filter(q => q.topicName === module.name);
+            const solved = moduleQuestions.filter(q => q.isSolved).length;
+            return (
+              <button
+                key={module.slug}
+                onClick={() => setSelectedTopic(module.slug)}
+                className="text-left p-5 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-indigo-500/50 hover:bg-slate-800/70 transition-colors"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-300">
+                      <Layers className="w-5 h-5" />
+                    </div>
+                    <h3 className="text-sm font-bold text-white">{module.name}</h3>
+                  </div>
+                  <span className="text-xs font-bold text-indigo-300">
+                    {moduleQuestions.length} questions
+                  </span>
+                </div>
+                <div className="mt-4 text-xs text-slate-400">{solved} solved</div>
+                <div className="h-1.5 mt-2 rounded-full bg-slate-950 overflow-hidden">
+                  <div
+                    className="h-full bg-indigo-500"
+                    style={{ width: `${moduleQuestions.length ? (solved / moduleQuestions.length) * 100 : 0}%` }}
+                  />
+                </div>
+              </button>
+            );
+          })}
+        </div>
       ) : (
-        <div className="overflow-hidden rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl">
+        <div>
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+            <button
+              onClick={() => setSelectedTopic(null)}
+              className="text-xs font-bold text-indigo-300 hover:text-indigo-200"
+            >
+              ← All modules
+            </button>
+            <span className="text-xs text-slate-400">
+              {filteredProblems.length} questions · {filteredProblems.filter(q => q.isSolved).length} solved
+            </span>
+          </div>
+          <div className="overflow-hidden rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-950/80 text-slate-400 uppercase tracking-wider text-[10px]">
                 <tr>
                   <th className="py-3.5 px-4 w-12 text-center">Status</th>
-                  <th className="py-3.5 px-4">Problem Name & Concept</th>
-                  <th className="py-3.5 px-4">Difficulty</th>
-                  <th className="py-3.5 px-4">Target Companies</th>
-                  <th className="py-3.5 px-4 text-center">External Link</th>
+                  <th className="py-3.5 px-4">Problem & Pattern</th>
+                  <th className="py-3.5 px-4 text-center">Reference</th>
                   <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60 text-slate-200">
-                {filteredProblems.map((p, idx) => (
+                {filteredProblems.map(p => (
                   <tr key={p.id} className="hover:bg-slate-800/40 transition-colors">
                     {/* Status Checkbox */}
                     <td className="py-4 px-4 text-center">
@@ -176,30 +228,6 @@ export default function DsaPractice() {
                         {p.description}
                       </div>
                     </td>
-
-                    {/* Difficulty */}
-                    <td className="py-4 px-4">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
-                        p.difficulty === 'HARD' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' :
-                        p.difficulty === 'MEDIUM' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
-                        'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                      }`}>
-                        {p.difficulty}
-                      </span>
-                    </td>
-
-                    {/* Company Tags */}
-                    <td className="py-4 px-4">
-                      <div className="flex flex-wrap gap-1">
-                        {p.companyTags?.split(',').map(tag => (
-                          <span key={tag} className="px-2 py-0.5 rounded bg-slate-950 text-[10px] font-bold text-slate-300 border border-slate-800">
-                            {tag.trim()}
-                          </span>
-                        ))}
-                      </div>
-                    </td>
-
-                    {/* External Link */}
                     <td className="py-4 px-4 text-center">
                       <a
                         href={getPracticeUrl(p)}
@@ -208,7 +236,7 @@ export default function DsaPractice() {
                         className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 text-indigo-400 border border-slate-800 text-[11px] font-semibold transition-colors"
                         aria-label={`Solve ${p.title} on LeetCode`}
                       >
-                        <span>Solve</span>
+                        <span>Search problem</span>
                         <ExternalLink className="w-3 h-3" />
                       </a>
                     </td>
@@ -243,6 +271,7 @@ export default function DsaPractice() {
             </table>
           </div>
         </div>
+        </div>
       )}
 
       {/* Problem Solution & Approach Modal */}
@@ -252,17 +281,8 @@ export default function DsaPractice() {
             {/* Modal Header */}
             <div className="p-6 border-b border-slate-800 flex items-start justify-between gap-4">
               <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
-                    activeModalProblem.difficulty === 'HARD' ? 'bg-rose-500/10 text-rose-400' :
-                    activeModalProblem.difficulty === 'MEDIUM' ? 'bg-amber-500/10 text-amber-400' :
-                    'bg-emerald-500/10 text-emerald-400'
-                  }`}>
-                    {activeModalProblem.difficulty}
-                  </span>
-                  <span className="text-[10px] text-slate-400 font-semibold">
-                    {activeModalProblem.companyTags}
-                  </span>
+                <div className="text-[10px] text-indigo-300 font-semibold mb-1">
+                  {activeModalProblem.topicName}
                 </div>
                 <h3 className="text-lg font-bold text-white">{activeModalProblem.title}</h3>
               </div>
@@ -346,7 +366,7 @@ export default function DsaPractice() {
                 rel="noopener noreferrer"
                 className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-indigo-600/20 transition-all"
               >
-                <span>Practice on LeetCode</span>
+                <span>Search on LeetCode</span>
                 <ExternalLink className="w-3.5 h-3.5" />
               </a>
             </div>

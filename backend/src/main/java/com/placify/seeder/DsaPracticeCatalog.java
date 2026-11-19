@@ -6,20 +6,91 @@ import com.placify.question.Topic;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.IntStream;
 
 final class DsaPracticeCatalog {
 
-    static final int TARGET_SIZE = 150;
+    static final int TARGET_SIZE = 165;
     private static final String COMPANY_TAGS = "Amazon,Google,Microsoft,TCS";
+    static final List<Module> MODULES = List.of(
+            new Module("arrays", "Arrays & Hashing"),
+            new Module("strings", "Strings & Backtracking"),
+            new Module("two-pointers", "Two Pointers & Sliding Window"),
+            new Module("stack-queue", "Stack & Queue"),
+            new Module("linked-list", "Linked Lists"),
+            new Module("binary-search", "Binary Search"),
+            new Module("trees", "Trees & Tries"),
+            new Module("heaps", "Heaps & Greedy"),
+            new Module("dynamic-programming", "Dynamic Programming"),
+            new Module("backtracking", "Backtracking & Recursion"),
+            new Module("graphs", "Graphs")
+    );
+
+    private static final List<String> TWO_POINTER_TITLES = List.of(
+            "3Sum", "Container With Most Water", "Trapping Rain Water", "Rotate Array",
+            "Longest Repeating Character Replacement", "Permutation in String",
+            "Find All Anagrams in a String", "Minimum Window Substring",
+            "Minimum Size Subarray Sum", "Sort Colors", "Four Sum", "Move Zeroes",
+            "Squares of a Sorted Array", "Sliding Window Maximum", "Max Consecutive Ones III"
+    );
+    private static final List<String> STRING_TITLES = List.of(
+            "Palindrome Partitioning", "Letter Combinations of a Phone Number",
+            "Word Search II", "Permutations II", "String Compression"
+    );
+    private static final List<String> STACK_TITLES = List.of(
+            "Binary Tree Level Order Traversal", "Binary Tree Right Side View",
+            "Binary Tree Zigzag Level Order Traversal", "Populating Next Right Pointers in Each Node",
+            "Serialize and Deserialize Binary Tree", "Maximum Depth of Binary Tree",
+            "Count Good Nodes in Binary Tree"
+    );
+    private static final List<String> TREE_BACKTRACKING_TITLES = List.of(
+            "Construct Binary Tree from Preorder and Inorder Traversal",
+            "Construct Binary Tree from Inorder and Postorder",
+            "Path Sum II", "Flatten Binary Tree to Linked List"
+    );
+    private static final List<String> HEAP_TITLES = List.of(
+            "Jump Game", "Jump Game II", "Best Time to Buy and Sell Stock with Cooldown",
+            "Best Time to Buy and Sell Stock with Transaction Fee",
+            "Best Time to Buy and Sell Stock III", "House Robber", "House Robber II",
+            "Minimum Path Sum"
+    );
+    private static final List<String> BACKTRACKING_TITLES = List.of(
+            "Combination Sum", "Target Sum", "Partition Equal Subset Sum", "Decode Ways"
+    );
+    private static final List<String> NEW_TWO_POINTER_TITLES = List.of(
+            "Minimum Size Subarray Sum", "Sort Colors", "Four Sum", "Move Zeroes",
+            "Squares of a Sorted Array", "Sliding Window Maximum", "Max Consecutive Ones III"
+    );
+    private static final List<String> NEW_STRING_TITLES = List.of("String Compression");
+    private static final List<String> NEW_LINKED_LIST_TITLES = List.of(
+            "Intersection of Two Linked Lists", "Palindrome Linked List",
+            "Reverse Linked List II", "Rotate List"
+    );
+    private static final List<String> NEW_BINARY_SEARCH_TITLES = List.of(
+            "Search Insert Position", "Find K Closest Elements", "Find the First Bad Version"
+    );
 
     private DsaPracticeCatalog() {
     }
 
-    static List<Question> createQuestions(Topic topic) {
+    static List<Topic> createModuleTopics() {
+        return MODULES.stream()
+                .map(module -> Topic.builder()
+                        .name(module.name())
+                        .slug("dsa-" + module.slug())
+                        .category("DSA")
+                        .description("DSA practice module: " + module.name())
+                        .icon("Binary")
+                        .build())
+                .toList();
+    }
+
+    static List<Question> createQuestions(Map<String, Topic> moduleTopics) {
         return IntStream.range(0, PROBLEMS.size())
                 .mapToObj(index -> {
                     Problem problem = PROBLEMS.get(index);
+                    String moduleSlug = moduleFor(index, problem.title());
                     List<String> options = new ArrayList<>(List.of(
                             problem.approach(),
                             "Try every possible combination; this is usually exponential or quadratic.",
@@ -32,7 +103,7 @@ final class DsaPracticeCatalog {
                     return Question.builder()
                             .title(problem.title())
                             .description(problem.statement())
-                            .topic(topic)
+                            .topic(moduleTopics.get(moduleSlug))
                             .category("DSA")
                             .difficulty(problem.difficulty())
                             .questionType("CODE_PRACTICE")
@@ -43,8 +114,37 @@ final class DsaPracticeCatalog {
                             .correctOption(String.valueOf((char) ('A' + correctIndex)))
                             .explanation(problem.explanation())
                             .companyTags(COMPANY_TAGS)
+                            .externalLink("https://leetcode.com/problemset/?search="
+                                    + java.net.URLEncoder.encode(problem.title(), java.nio.charset.StandardCharsets.UTF_8))
                             .build();
                 }).toList();
+    }
+
+    private static String moduleFor(int index, String title) {
+        if (TWO_POINTER_TITLES.contains(title)) return "two-pointers";
+        if (STRING_TITLES.contains(title)) return "strings";
+        if (STACK_TITLES.contains(title)) return "stack-queue";
+        if (TREE_BACKTRACKING_TITLES.contains(title)) return "backtracking";
+        if (HEAP_TITLES.contains(title)) return "heaps";
+        if (BACKTRACKING_TITLES.contains(title)) return "backtracking";
+        if (NEW_LINKED_LIST_TITLES.contains(title)) return "linked-list";
+        if (NEW_BINARY_SEARCH_TITLES.contains(title)) return "binary-search";
+        if (NEW_STRING_TITLES.contains(title)) return "strings";
+        if (NEW_TWO_POINTER_TITLES.contains(title)) return "two-pointers";
+
+        if (index < 18) return "arrays";
+        if (index < 31) return "strings";
+        if (index < 39) return "stack-queue";
+        if (index < 49) return "linked-list";
+        if (index < 60) return "binary-search";
+        if (index < 85) return "trees";
+        if (index < 92) return "heaps";
+        if (index < 117) return "dynamic-programming";
+        if (index < 128) return "backtracking";
+        return "graphs";
+    }
+
+    record Module(String slug, String name) {
     }
 
     private static Problem p(String title, String difficulty, String statement, String approach, String explanation) {
@@ -193,7 +293,22 @@ final class DsaPracticeCatalog {
             p("Cheapest Flights Within K Stops", "MEDIUM", "Find the cheapest route between two cities using at most k intermediate stops.", "Use bounded-edge relaxation or layered Bellman-Ford for k+1 rounds.", "Each round extends paths by at most one flight; copy prior distances so a round cannot use multiple extra edges."),
             p("Min Cost to Connect All Points", "MEDIUM", "Connect all points with minimum total Manhattan-distance cable length.", "Use Prim's minimum spanning tree algorithm; O(n^2) for the dense complete graph.", "Repeatedly add the cheapest edge from the connected set to an unconnected point."),
             p("Reconstruct Itinerary", "HARD", "Use every directed airline ticket exactly once to build the lexicographically smallest itinerary from a required start.", "Run Hierholzer's algorithm with each airport's destinations in lexical order.", "Depth-first edge consumption and reverse postorder produce an Eulerian route; ordered adjacency selects the lexical route."),
-            p("Accounts Merge", "MEDIUM", "Merge accounts that share an email address and return sorted emails per person.", "Union accounts by shared email, then group emails by representative; O(N alpha(N)+sorting).", "An email-to-owner map joins overlapping accounts; collect each connected component and sort its emails.")
+            p("Accounts Merge", "MEDIUM", "Merge accounts that share an email address and return sorted emails per person.", "Union accounts by shared email, then group emails by representative; O(N alpha(N)+sorting).", "An email-to-owner map joins overlapping accounts; collect each connected component and sort its emails."),
+            p("Minimum Size Subarray Sum", "MEDIUM", "Given positive integers and a target, find the shortest contiguous subarray whose sum is at least the target.", "Use a sliding window, expanding the right edge and shrinking the left edge while the sum meets the target.", "Positive values make the window sum monotonic as either edge moves. Each element enters and leaves once, giving O(n) time."),
+            p("Sort Colors", "MEDIUM", "Sort an array containing only 0, 1, and 2 in-place without using a library sort.", "Use three-way partitioning with low, current, and high pointers; O(n) time and O(1) space.", "Move zeros before low and twos after high; advance current only after handling its value."),
+            p("Four Sum", "MEDIUM", "Return unique quadruplets whose values sum to a target.", "Sort, fix two values, then use two pointers and skip duplicates; O(n^3) time.", "Sorting enables pruning and duplicate skipping; the inner two-pointer scan finds each distinct pair for the fixed values."),
+            p("Move Zeroes", "EASY", "Move all zeroes to the end of an array while preserving the order of nonzero values.", "Compact nonzero values with a write pointer, then fill the remaining positions with zeroes.", "The write pointer preserves encounter order and uses O(1) extra space."),
+            p("Squares of a Sorted Array", "EASY", "Return the squares of a sorted array in sorted order, including negative values.", "Compare absolute values at both ends and fill the output from right to left; O(n) time.", "The largest square must come from one of the endpoints because the input is sorted."),
+            p("Sliding Window Maximum", "HARD", "For every window of size k, return its maximum value.", "Maintain a decreasing deque of indices, removing expired indices and smaller trailing values; O(n) time.", "The deque front is always the current maximum; each index is added and removed at most once."),
+            p("Max Consecutive Ones III", "MEDIUM", "Given a binary array and k, find the longest contiguous segment of ones after flipping at most k zeroes.", "Use a sliding window that shrinks whenever it contains more than k zeroes; O(n) time.", "The window is valid when its zero count is at most k. Each index enters and leaves once."),
+            p("String Compression", "MEDIUM", "Compress consecutive repeated characters in-place as a character followed by its count, returning the new length.", "Use separate read and write pointers to count each run and write its character and count digits.", "Each run is read once and the write pointer never overtakes unread input, so the algorithm uses O(1) extra space."),
+            p("Intersection of Two Linked Lists", "EASY", "Return the node at which two singly linked lists intersect, or null if they do not.", "Use two pointers that switch to the other list's head after reaching the end; O(m+n) time.", "Both pointers traverse the same combined distance, aligning their remaining path lengths without extra storage."),
+            p("Palindrome Linked List", "EASY", "Determine whether a singly linked list reads the same forward and backward using O(1) extra space.", "Find the midpoint, reverse the second half, and compare corresponding nodes.", "The midpoint split produces equal-length halves (or one extra node in front); reversing permits an in-place comparison."),
+            p("Reverse Linked List II", "MEDIUM", "Reverse nodes between positions left and right in a singly linked list without changing other nodes.", "Use a sentinel and repeatedly move the node after the sublist head to the front of the sublist.", "Head-insertion reverses the selected segment in-place and correctly handles left equal to one."),
+            p("Rotate List", "MEDIUM", "Rotate a linked list to the right by k places.", "Connect the tail to the head to form a cycle, then break it at the new tail after reducing k modulo the list length.", "The new tail is length-k-1 steps from the old head. Handle empty lists and zero effective rotations before forming the cycle."),
+            p("Search Insert Position", "EASY", "Return the index where a target belongs in a sorted array, whether or not it is present.", "Binary-search for the lower bound: the first index whose value is not less than the target.", "The lower-bound invariant narrows the insertion point in O(log n) time."),
+            p("Find K Closest Elements", "MEDIUM", "Return the k values closest to x in a sorted array, breaking ties toward the smaller value.", "Binary-search the left edge of a length-k window; compare the values just outside each candidate window.", "The best window is contiguous in a sorted array, and the comparison eliminates half the possible starts each step."),
+            p("Find the First Bad Version", "EASY", "Find the first bad version when versions are ordered and every version after it is also bad.", "Binary-search the first true result of the monotonic good/bad predicate.", "The predicate changes from false to true once, so lower-bound binary search finds the transition in O(log n) calls.")
     );
 
 

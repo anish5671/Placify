@@ -44,9 +44,10 @@ Placify is a full-stack web application that helps students and software enginee
 - Use per-question hint and solution tabs, bookmark questions, and mark questions as solved.
 
 ### DSA Practice
-- Browse a bank of 150 DSA practice questions across easy, medium, and hard difficulty levels.
-- Review each problem statement and its suggested approach.
-- Open each problem directly on LeetCode when a direct link is available. Otherwise, search for it in LeetCode's problem list.
+- Browse 165 practice problems in 11 topic modules, with 15 problems in each module.
+- Review original problem summaries and suggested approaches without difficulty labels.
+- Use Striver's A2Z sheet, LeetCode 75, and GeeksforGeeks as study references; per-problem links search LeetCode for the relevant problem.
+- These are curated practice prompts, not copied source text or verified company PYQs.
 - Track solved problems and bookmarks.
 
 ### Mock Tests
