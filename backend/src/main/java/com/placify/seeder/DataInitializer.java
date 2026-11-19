@@ -747,19 +747,16 @@ public class DataInitializer implements CommandLineRunner {
                 .orElseThrow(() -> new IllegalStateException("The quantitative aptitude topic is required for mock question seeding."));
 
         List<Question> aptitudeQuestions = questionRepository.findByCategoryIgnoreCase("APTITUDE");
-        if (aptitudeQuestions.size() < MockAssessmentCatalog.APTITUDE_BANK_SIZE) {
-            Set<String> existingTitles = aptitudeQuestions.stream()
-                    .map(Question::getTitle)
-                    .collect(java.util.stream.Collectors.toSet());
-            List<Question> additions = MockAssessmentCatalog.createAptitudeQuestions(
-                            aptitudeTopic, 1, MockAssessmentCatalog.APTITUDE_BANK_SIZE)
-                    .stream()
-                    .filter(question -> !existingTitles.contains(question.getTitle()))
-                    .limit(MockAssessmentCatalog.APTITUDE_BANK_SIZE - aptitudeQuestions.size())
-                    .toList();
-            questionRepository.saveAll(additions);
-            log.info("Seeded {} aptitude questions.", additions.size());
-        } else if (aptitudeQuestions.size() > MockAssessmentCatalog.APTITUDE_BANK_SIZE) {
+        List<Question> aptitudeCatalog = MockAssessmentCatalog.createAptitudeQuestions(
+                aptitudeTopic, 1, MockAssessmentCatalog.APTITUDE_BANK_SIZE);
+        List<Question> aptitudeUpdates = synchronizeCatalogQuestions(
+                aptitudeQuestions, aptitudeCatalog,
+                Math.max(0, MockAssessmentCatalog.APTITUDE_BANK_SIZE - aptitudeQuestions.size()));
+        if (!aptitudeUpdates.isEmpty()) {
+            questionRepository.saveAll(aptitudeUpdates);
+            log.info("Synchronized {} aptitude catalog questions.", aptitudeUpdates.size());
+        }
+        if (aptitudeQuestions.size() > MockAssessmentCatalog.APTITUDE_BANK_SIZE) {
             log.warn("Found {} aptitude questions; the requested bank size is {}.",
                     aptitudeQuestions.size(), MockAssessmentCatalog.APTITUDE_BANK_SIZE);
         }
@@ -767,34 +764,86 @@ public class DataInitializer implements CommandLineRunner {
         long coreQuestionCount = MockAssessmentCatalog.CORE_CATEGORIES.stream()
                 .mapToLong(questionRepository::countByCategoryIgnoreCase)
                 .sum();
-        if (coreQuestionCount < MockAssessmentCatalog.CORE_BANK_SIZE) {
-            Map<String, Topic> coreTopics = Map.of(
-                    "JAVA_OOPS", topicRepository.findBySlug("java-oops")
-                            .orElseThrow(() -> new IllegalStateException("The Java & OOP topic is required for mock question seeding.")),
-                    "DBMS", topicRepository.findBySlug("dbms")
-                            .orElseThrow(() -> new IllegalStateException("The DBMS topic is required for mock question seeding.")),
-                    "OS", topicRepository.findBySlug("os")
-                            .orElseThrow(() -> new IllegalStateException("The operating systems topic is required for mock question seeding.")),
-                    "NETWORKS", topicRepository.findBySlug("networks")
-                            .orElseThrow(() -> new IllegalStateException("The computer networks topic is required for mock question seeding."))
-            );
-            Set<String> existingTitles = MockAssessmentCatalog.CORE_CATEGORIES.stream()
-                    .map(questionRepository::findByCategoryIgnoreCase)
-                    .flatMap(List::stream)
-                    .map(Question::getTitle)
-                    .collect(java.util.stream.Collectors.toSet());
-            List<Question> additions = MockAssessmentCatalog.createCoreQuestions(
-                            coreTopics, 1, MockAssessmentCatalog.CORE_BANK_SIZE)
-                    .stream()
-                    .filter(question -> !existingTitles.contains(question.getTitle()))
-                    .limit(MockAssessmentCatalog.CORE_BANK_SIZE - (int) coreQuestionCount)
-                    .toList();
-            questionRepository.saveAll(additions);
-            log.info("Seeded {} CSE core questions.", additions.size());
-        } else if (coreQuestionCount > MockAssessmentCatalog.CORE_BANK_SIZE) {
+        Map<String, Topic> coreTopics = Map.of(
+                "JAVA_OOPS", topicRepository.findBySlug("java-oops")
+                        .orElseThrow(() -> new IllegalStateException("The Java & OOP topic is required for mock question seeding.")),
+                "DBMS", topicRepository.findBySlug("dbms")
+                        .orElseThrow(() -> new IllegalStateException("The DBMS topic is required for mock question seeding.")),
+                "OS", topicRepository.findBySlug("os")
+                        .orElseThrow(() -> new IllegalStateException("The operating systems topic is required for mock question seeding.")),
+                "NETWORKS", topicRepository.findBySlug("networks")
+                        .orElseThrow(() -> new IllegalStateException("The computer networks topic is required for mock question seeding."))
+        );
+        List<Question> coreQuestions = MockAssessmentCatalog.CORE_CATEGORIES.stream()
+                .map(questionRepository::findByCategoryIgnoreCase)
+                .flatMap(List::stream)
+                .toList();
+        List<Question> coreCatalog = MockAssessmentCatalog.createCoreQuestions(
+                coreTopics, 1, MockAssessmentCatalog.CORE_BANK_SIZE);
+        List<Question> coreUpdates = synchronizeCatalogQuestions(
+                coreQuestions, coreCatalog,
+                Math.max(0, MockAssessmentCatalog.CORE_BANK_SIZE - (int) coreQuestionCount));
+        if (!coreUpdates.isEmpty()) {
+            questionRepository.saveAll(coreUpdates);
+            log.info("Synchronized {} CSE core catalog questions.", coreUpdates.size());
+        }
+        if (coreQuestionCount > MockAssessmentCatalog.CORE_BANK_SIZE) {
             log.warn("Found {} CSE core questions; the requested bank size is {}.",
                     coreQuestionCount, MockAssessmentCatalog.CORE_BANK_SIZE);
         }
+    }
+
+    private List<Question> synchronizeCatalogQuestions(
+            List<Question> existingQuestions,
+            List<Question> catalogQuestions,
+            int additionsAllowed
+    ) {
+        Map<String, Question> existingByKey = new HashMap<>();
+        for (Question existing : existingQuestions) {
+            String key = catalogQuestionKey(existing.getTitle());
+            if (key != null) {
+                existingByKey.put(key, existing);
+            }
+        }
+
+        List<Question> synchronizedQuestions = new ArrayList<>();
+        for (Question catalogQuestion : catalogQuestions) {
+            Question existing = existingByKey.get(catalogQuestionKey(catalogQuestion.getTitle()));
+            if (existing != null) {
+                copyCatalogQuestion(catalogQuestion, existing);
+                synchronizedQuestions.add(existing);
+            } else if (additionsAllowed > 0) {
+                synchronizedQuestions.add(catalogQuestion);
+                additionsAllowed--;
+            }
+        }
+        return synchronizedQuestions;
+    }
+
+    private String catalogQuestionKey(String title) {
+        int separator = title.indexOf(": ");
+        if (separator < 0) {
+            return null;
+        }
+        String key = title.substring(0, separator);
+        return key.matches("(Aptitude|Core CS) \\d{3}") ? key : null;
+    }
+
+    private void copyCatalogQuestion(Question source, Question target) {
+        target.setTitle(source.getTitle());
+        target.setDescription(source.getDescription());
+        target.setTopic(source.getTopic());
+        target.setCategory(source.getCategory());
+        target.setDifficulty(source.getDifficulty());
+        target.setQuestionType(source.getQuestionType());
+        target.setOptionA(source.getOptionA());
+        target.setOptionB(source.getOptionB());
+        target.setOptionC(source.getOptionC());
+        target.setOptionD(source.getOptionD());
+        target.setCorrectOption(source.getCorrectOption());
+        target.setExplanation(source.getExplanation());
+        target.setHint(source.getHint());
+        target.setExternalLink(source.getExternalLink());
     }
 
     private void syncAptitudeCoreMockTests() {

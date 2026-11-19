@@ -19,12 +19,13 @@ final class MockAssessmentCatalog {
     static final int QUESTIONS_PER_SECTION = 10;
     static final int QUESTIONS_PER_TEST = 20;
     static final List<String> CORE_CATEGORIES = List.of("JAVA_OOPS", "DBMS", "OS", "NETWORKS");
+    private static final String APTITUDE_REFERENCE = "https://www.indiabix.com/aptitude/";
 
     private static final List<CoreFact> JAVA_FACTS = List.of(
-            fact("Which keyword prevents a class from being subclassed?", "final", "A final class cannot be extended."),
-            fact("What is method overloading in Java?", "Same method name with different parameter lists", "Overloading is resolved at compile time using the method signature."),
-            fact("What is method overriding in Java?", "A subclass provides a new implementation of an inherited method", "Overriding replaces inherited behavior for a matching method signature."),
-            fact("Which Java type supports multiple inheritance of type?", "An interface", "A class can implement multiple interfaces."),
+            fact("A shared counter is volatile and updated with count++. Can two threads still lose an increment?", "Yes; volatile does not make the read-modify-write operation atomic", "volatile guarantees visibility and ordering for accesses, but count++ is a compound operation. Use synchronization or an atomic type for an atomic increment."),
+            fact("A class overrides equals() but inherits Object.hashCode(). What can fail in a HashMap?", "Equal keys can have different hash codes and fail lookup", "Hash-based collections rely on equal objects having equal hash codes; equals() and hashCode() must obey that contract."),
+            fact("A subclass overrides an instance method and the object is held in a superclass reference. Which implementation runs?", "The subclass implementation selected at runtime", "Overridden instance methods use dynamic dispatch based on the object's runtime type."),
+            fact("An overload is called with an argument declared as Number but holding an Integer. Which overload is selected?", "The overload chosen using the compile-time argument type", "Overload resolution occurs at compile time; runtime dispatch applies to overriding, not overload selection."),
             fact("Which collection stores unique elements without guaranteeing iteration order?", "HashSet", "HashSet uses hashing and does not guarantee element order."),
             fact("Which collection is backed by a resizable array?", "ArrayList", "ArrayList provides indexed access using a dynamically resized array."),
             fact("Which Java type is immutable and suitable for shared string literals?", "String", "String objects cannot be changed after they are created."),
@@ -62,10 +63,10 @@ final class MockAssessmentCatalog {
     );
 
     private static final List<CoreFact> DBMS_FACTS = List.of(
-            fact("What is the main purpose of a primary key?", "Uniquely identify each row and disallow NULL", "A primary key uniquely identifies each row in a table."),
-            fact("What does a foreign key enforce?", "Referential integrity between related tables", "A foreign key requires referenced values to match a key in the related table."),
-            fact("Why is database normalization used?", "To reduce avoidable data duplication and update anomalies", "Normalization organizes data to reduce redundancy and modification anomalies."),
-            fact("What does first normal form require for each field?", "Each field contains an atomic value", "First normal form disallows repeating groups and multi-valued fields."),
+            fact("A LEFT JOIN is followed by WHERE right_table.status = 'ACTIVE'. What happens to unmatched left rows?", "They are filtered out because the WHERE comparison is not true for NULL", "The WHERE predicate rejects rows where the right-side status is NULL, effectively removing unmatched rows from the result."),
+            fact("A query uses COUNT(nullable_column) over five rows, two of which contain NULL in that column. What does it count?", "Three", "COUNT(column) excludes NULL values; COUNT(*) would count all five rows."),
+            fact("A composite candidate key is (student_id, course_id), and student_name depends only on student_id. Which normal form issue exists?", "A partial dependency that violates 2NF", "A non-key attribute depending on only part of a composite candidate key is a partial dependency."),
+            fact("An index exists on (last_name, first_name). Which predicate can most directly use its leading-key ordering?", "A predicate on last_name", "A composite B-tree index is generally most useful when predicates constrain its leading column(s)."),
             fact("What does second normal form eliminate?", "Partial dependency on part of a candidate key", "Second normal form requires first normal form and removes partial dependencies."),
             fact("What does third normal form eliminate?", "Transitive dependency of non-key attributes on a key", "Third normal form removes transitive dependencies between non-key attributes."),
             fact("What does atomicity mean in ACID?", "A transaction happens completely or not at all", "Atomicity prevents a transaction from being partially applied."),
@@ -103,10 +104,10 @@ final class MockAssessmentCatalog {
     );
 
     private static final List<CoreFact> OS_FACTS = List.of(
-            fact("What is a process?", "A program in execution with its own process state", "A process is an executing program together with its managed resources."),
-            fact("What is a thread?", "An execution unit that shares its process address space", "Threads in one process share memory while maintaining their own execution state."),
-            fact("What happens during a context switch?", "The CPU saves one execution state and restores another", "The operating system saves and loads execution state to switch tasks."),
-            fact("What is preemptive scheduling?", "The OS can interrupt a running task to schedule another", "A preemptive scheduler can take the CPU away from a running process."),
+            fact("A Round Robin system uses a very large time quantum. Which scheduler does its behavior approach?", "First-Come, First-Served", "With a sufficiently large quantum, each process usually finishes its CPU burst before preemption, making Round Robin resemble FCFS."),
+            fact("A process repeatedly incurs page faults because its active pages do not fit in memory. What condition is this?", "Thrashing", "When paging activity dominates useful execution because the working set cannot remain resident, the system is thrashing."),
+            fact("Two processes each hold one resource and wait for the other. Which deadlock condition is directly present?", "Circular wait", "The dependency forms a cycle: each process waits for a resource held by another in the cycle."),
+            fact("A thread waits indefinitely because other threads repeatedly acquire a lock first. What is this?", "Starvation", "Starvation is indefinite postponement; fair scheduling or lock policies can reduce it."),
             fact("How does First-Come, First-Served scheduling choose a process?", "By arrival order", "FCFS schedules ready processes in the order they arrive."),
             fact("How does Round Robin scheduling share the CPU?", "It gives each ready process a time quantum in turn", "Round Robin cycles through ready tasks using bounded time slices."),
             fact("What is the selection rule in Shortest Job First scheduling?", "Choose the process with the shortest next CPU burst", "SJF prioritizes the shortest estimated CPU burst."),
@@ -144,10 +145,10 @@ final class MockAssessmentCatalog {
     );
 
     private static final List<CoreFact> NETWORK_FACTS = List.of(
-            fact("At which OSI layer does IP provide addressing and routing?", "Network layer", "IP operates at the network layer."),
-            fact("Which transport protocol provides reliable, ordered delivery?", "TCP", "TCP provides connection-oriented reliable byte-stream delivery."),
-            fact("Which transport protocol sends connectionless datagrams?", "UDP", "UDP sends datagrams without establishing a transport connection."),
-            fact("What does DNS primarily do?", "Maps domain names to IP addresses", "DNS resolves human-readable names to network records such as IP addresses."),
+            fact("A host must send packets to an address outside its local subnet. Which device does it send them to first?", "The configured default gateway", "A host forwards off-subnet traffic to its default gateway, which routes packets onward."),
+            fact("An application requires ordered delivery and retransmission when data is lost. Which transport protocol should it use?", "TCP", "TCP provides a reliable, ordered byte stream with acknowledgments and retransmissions."),
+            fact("A live audio stream prioritizes low latency and handles occasional packet loss itself. Why might it use UDP?", "UDP avoids transport-level connection setup and retransmission delays", "UDP has no built-in reliable delivery or connection setup, which can suit latency-sensitive traffic that handles loss itself."),
+            fact("A router has a 192.168.10.0/26 subnet. How many usable IPv4 host addresses are available?", "62", "A /26 leaves 6 host bits: 2^6 = 64 total addresses, less the network and broadcast addresses."),
             fact("At which OSI layer does HTTP operate?", "Application layer", "HTTP is an application-layer protocol."),
             fact("What does HTTPS add to HTTP?", "TLS protection for the connection", "HTTPS uses TLS to provide confidentiality and authentication."),
             fact("What does Ethernet primarily define for a local network?", "Link-layer framing and media access", "Ethernet specifies link-layer communication on wired LANs."),
@@ -210,7 +211,7 @@ final class MockAssessmentCatalog {
             }
             questions.add(buildQuestion(
                     String.format(Locale.ROOT, "Core CS %03d: %s", number, fact.prompt()),
-                    "CSE core concept practice.",
+                    "Original Placify practice question. Use the linked reference for concept revision; the question is not copied.",
                     topics.get(category),
                     category,
                     fact.answer(),
@@ -235,55 +236,82 @@ final class MockAssessmentCatalog {
 
         switch (type) {
             case 0 -> {
-                int base = 100 * (variation + 3);
-                int percentage = 15 + (variation % 6) * 5;
-                int value = base * percentage / 100;
-                title = String.format(Locale.ROOT, "What is %d%% of %d?", percentage, base);
-                explanation = String.format(Locale.ROOT, "%d%% of %d = (%d / 100) x %d = %d.", percentage, base, percentage, base, value);
-                hint = "Convert the percentage to a fraction over 100, then multiply by the given value.";
-                answer = Integer.toString(value);
-                distractors = numberDistractors(value);
+                int markedPrice = 1000 * (variation + 3);
+                int firstDiscount = 10 + (variation % 5) * 5;
+                int finalPrice = markedPrice * (100 - firstDiscount) / 100 * 90 / 100;
+                title = String.format(Locale.ROOT,
+                        "A product marked at %d receives successive discounts of %d%% and 10%%. What is the final price?",
+                        markedPrice, firstDiscount);
+                explanation = String.format(Locale.ROOT,
+                        "Apply discounts successively: %d x (%d/100) x (90/100) = %d. The discounts are not added as percentages.",
+                        markedPrice, 100 - firstDiscount, finalPrice);
+                hint = "Apply the second discount to the already-discounted price, not to the marked price.";
+                answer = Integer.toString(finalPrice);
+                distractors = numberDistractors(finalPrice);
             }
             case 1 -> {
                 int firstPart = 2 + variation % 5;
                 int secondPart = 3 + variation % 4;
+                int thirdPart = 4 + variation % 3;
                 int multiplier = variation + 4;
-                int total = (firstPart + secondPart) * multiplier;
+                int total = (firstPart + secondPart + thirdPart) * multiplier;
                 int share = firstPart * multiplier;
-                title = String.format(Locale.ROOT, "A total of %d is divided in the ratio %d:%d. What is the first share?", total, firstPart, secondPart);
-                explanation = String.format(Locale.ROOT, "The total number of ratio parts is %d + %d = %d. Each part is %d / %d = %d, so the first share is %d x %d = %d.", firstPart, secondPart, firstPart + secondPart, total, firstPart + secondPart, multiplier, firstPart, multiplier, share);
-                hint = "Add the ratio parts first, then multiply one part by the first ratio term.";
+                title = String.format(Locale.ROOT,
+                        "A budget of %d is split among three teams in the ratio %d:%d:%d. How much does the first team receive?",
+                        total, firstPart, secondPart, thirdPart);
+                explanation = String.format(Locale.ROOT,
+                        "There are %d + %d + %d = %d ratio parts. One part is %d / %d = %d, so the first team receives %d x %d = %d.",
+                        firstPart, secondPart, thirdPart, firstPart + secondPart + thirdPart,
+                        total, firstPart + secondPart + thirdPart, multiplier, firstPart, multiplier, share);
+                hint = "Include all three ratio terms when finding the value of one part.";
                 answer = Integer.toString(share);
                 distractors = numberDistractors(share);
             }
             case 2 -> {
                 int cost = 200 * (variation + 5);
-                int profitPercent = 10 + (variation % 6) * 5;
-                int sellingPrice = cost * (100 + profitPercent) / 100;
-                title = String.format(Locale.ROOT, "An item costs %d and is sold at a %d%% profit. What is its selling price?", cost, profitPercent);
-                explanation = String.format(Locale.ROOT, "Selling price = cost x (100 + profit%%) / 100 = %d x %d / 100 = %d.", cost, 100 + profitPercent, sellingPrice);
-                hint = "A profit is added to the cost price; multiply the cost by (100 + profit percentage) / 100.";
-                answer = Integer.toString(sellingPrice);
-                distractors = numberDistractors(sellingPrice);
+                int markedUpPrice = cost * 120 / 100;
+                int sellingPrice = markedUpPrice * 90 / 100;
+                int profit = sellingPrice - cost;
+                title = String.format(Locale.ROOT,
+                        "A shop marks an item costing %d up by 20%%, then gives a 10%% discount. What is the profit?",
+                        cost);
+                explanation = String.format(Locale.ROOT,
+                        "Selling price = %d x 120/100 x 90/100 = %d. Profit = %d - %d = %d.",
+                        cost, sellingPrice, sellingPrice, cost, profit);
+                hint = "Calculate the selling price after both changes, then subtract the original cost.";
+                answer = Integer.toString(profit);
+                distractors = numberDistractors(profit);
             }
             case 3 -> {
-                int first = 12 + variation * 2;
-                int average = first + 3;
-                title = String.format(Locale.ROOT, "What is the average of %d, %d, %d, and %d?", first, first + 2, first + 4, first + 6);
-                explanation = String.format(Locale.ROOT, "The sum is %d + %d + %d + %d = %d. Dividing by 4 gives an average of %d.", first, first + 2, first + 4, first + 6, 4 * average, average);
-                hint = "Add all four values and divide the sum by four.";
-                answer = Integer.toString(average);
-                distractors = numberDistractors(average);
+                int candidates = 5 + variation % 6;
+                int previousAverage = 60 + variation % 16;
+                int scoreIncrease = 1 + variation % 2;
+                int newScore = previousAverage + candidates * scoreIncrease;
+                int newAverage = (candidates * previousAverage + newScore) / (candidates + 1);
+                title = String.format(Locale.ROOT,
+                        "A group of %d candidates averages %d points. A new candidate joins and scores %d points. What is the new average?",
+                        candidates, previousAverage, newScore);
+                explanation = String.format(Locale.ROOT,
+                        "Previous total = %d x %d = %d. New average = (%d + %d) / %d = %d.",
+                        candidates, previousAverage, candidates * previousAverage, candidates * previousAverage,
+                        newScore, candidates + 1, newAverage);
+                hint = "Recover the group's total from its average, add the new score, then divide by the new group size.";
+                answer = Integer.toString(newAverage);
+                distractors = numberDistractors(newAverage);
             }
             case 4 -> {
-                int speed = 36 + variation * 9;
-                int time = 2 + variation;
-                int distance = speed * time;
-                title = String.format(Locale.ROOT, "A vehicle travels at %d km/h for %d hours. How far does it travel?", speed, time);
-                explanation = String.format(Locale.ROOT, "Distance = speed x time = %d km/h x %d h = %d km.", speed, time, distance);
-                hint = "Use distance = speed x time, keeping the time unit in hours.";
-                answer = Integer.toString(distance);
-                distractors = numberDistractors(distance);
+                int slowerSpeed = 30 * (variation + 1);
+                int fasterSpeed = slowerSpeed * 2;
+                int averageSpeed = 2 * slowerSpeed * fasterSpeed / (slowerSpeed + fasterSpeed);
+                title = String.format(Locale.ROOT,
+                        "A vehicle travels equal distances at %d km/h and %d km/h. What is its average speed for the whole trip?",
+                        slowerSpeed, fasterSpeed);
+                explanation = String.format(Locale.ROOT,
+                        "For equal distances, average speed is the harmonic mean: 2uv/(u+v) = 2 x %d x %d / (%d + %d) = %d km/h.",
+                        slowerSpeed, fasterSpeed, slowerSpeed, fasterSpeed, averageSpeed);
+                hint = "For equal-distance legs, do not take the arithmetic mean of the two speeds.";
+                answer = Integer.toString(averageSpeed);
+                distractors = numberDistractors(averageSpeed);
             }
             case 5 -> {
                 int principal = 1000 * (variation + 1);
@@ -313,11 +341,18 @@ final class MockAssessmentCatalog {
                 int red = 2 + variation;
                 int blue = 5 + variation;
                 int total = red + blue;
-                title = String.format(Locale.ROOT, "A bag contains %d red and %d blue balls. What is the probability of drawing a red ball?", red, blue);
-                answer = fraction(red, total);
-                explanation = String.format(Locale.ROOT, "Probability = favorable outcomes / total outcomes = %d / %d = %s.", red, total, answer);
-                hint = "Probability is the number of favorable outcomes divided by the total number of equally likely outcomes.";
-                distractors = List.of(fraction(red + 1, total), fraction(red, total + 1), fraction(blue, total));
+                int favorableOutcomes = red * blue;
+                int totalOutcomes = total * (total - 1);
+                title = String.format(Locale.ROOT,
+                        "A bag contains %d red and %d blue balls. Two balls are drawn without replacement. What is the probability of getting one of each color?",
+                        red, blue);
+                answer = fraction(2 * favorableOutcomes, totalOutcomes);
+                explanation = String.format(Locale.ROOT,
+                        "The ordered favorable outcomes are red-blue or blue-red: 2 x %d x %d. Total ordered outcomes are %d x %d. The probability is %s.",
+                        red, blue, total, total - 1, answer);
+                hint = "Count both color orders, and reduce the number of remaining balls after the first draw.";
+                distractors = List.of(fraction(red, total), fraction(2 * red * blue, total * total),
+                        fraction(blue, total));
             }
             case 8 -> {
                 int firstWorkerDays = 6 + variation * 3;
@@ -343,7 +378,7 @@ final class MockAssessmentCatalog {
 
         return buildQuestion(
                 String.format(Locale.ROOT, "Aptitude %03d: %s", number, title),
-                "Quantitative aptitude practice.",
+                "Original Placify practice question. Use the linked reference for concept revision; the question is not copied.",
                 topic,
                 "APTITUDE",
                 answer,
@@ -372,11 +407,17 @@ final class MockAssessmentCatalog {
             options.add(optionIndex == correctIndex ? answer : distractors.get(distractorIndex++));
         }
 
-        String difficulty = switch ((number - 1) % 3) {
-            case 0 -> "EASY";
-            case 1 -> "MEDIUM";
-            default -> "HARD";
-        };
+        String difficulty;
+        if ("APTITUDE".equals(category)) {
+            difficulty = switch ((number - 1) % 10) {
+                case 1, 5, 8 -> "EASY";
+                case 7, 9 -> "HARD";
+                default -> "MEDIUM";
+            };
+        } else {
+            int factIndex = (number - 1) / CORE_CATEGORIES.size();
+            difficulty = factIndex < 4 ? "HARD" : "MEDIUM";
+        }
 
         return Question.builder()
                 .title(title)
@@ -392,11 +433,42 @@ final class MockAssessmentCatalog {
                 .correctOption(String.valueOf((char) ('A' + correctIndex)))
                 .explanation(explanation)
                 .hint(hint)
+                .externalLink(referenceFor(category))
                 .build();
     }
 
+    private static String referenceFor(String category) {
+        return switch (category) {
+            case "APTITUDE" -> APTITUDE_REFERENCE;
+            case "JAVA_OOPS" -> "https://www.geeksforgeeks.org/java/java-interview-questions/";
+            case "DBMS" -> "https://www.geeksforgeeks.org/dbms/dbms/";
+            case "OS" -> "https://www.geeksforgeeks.org/operating-systems/operating-systems-interview-questions/";
+            case "NETWORKS" -> "https://www.geeksforgeeks.org/computer-networks/computer-network-tutorials/";
+            default -> throw new IllegalArgumentException("No learning reference configured for category: " + category);
+        };
+    }
+
     private static List<String> numberDistractors(int answer) {
-        return List.of(Integer.toString(answer - 1), Integer.toString(answer + 1), Integer.toString(answer + 2));
+        List<String> distractors = new ArrayList<>(3);
+        int[] candidates = {
+                answer / 2,
+                answer * 2,
+                answer + Math.max(1, answer / 10),
+                answer - 1,
+                answer + 1,
+                answer + 2,
+                answer + 3
+        };
+        for (int candidate : candidates) {
+            String value = Integer.toString(candidate);
+            if (!value.equals(Integer.toString(answer)) && !distractors.contains(value)) {
+                distractors.add(value);
+            }
+            if (distractors.size() == 3) {
+                break;
+            }
+        }
+        return distractors;
     }
 
     private static String fraction(int numerator, int denominator) {

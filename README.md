@@ -39,7 +39,7 @@ Placify is a full-stack web application that helps students and software enginee
 
 ### Question Bank
 - Browse aptitude, reasoning, verbal ability, Java, DBMS, SQL, operating systems, networking, and DSA questions.
-- Practice 15 important-question sets: 10 Aptitude banks and 5 CSE Core banks, with 30 questions per set (300 Aptitude and 150 CSE Core questions total).
+- Practice 15 question banks: 10 Aptitude sets and 5 CSE Core sets, with 30 questions per set (300 Aptitude and 150 CSE Core questions total). These are original Placify questions, including multi-step aptitude problems and scenario-based core concepts; each links to an IndiaBIX or GeeksforGeeks topic reference for further study. The linked references are not claimed as the source of the question wording.
 - Search and filter questions by category, difficulty, and company.
 - Use per-question hint and solution tabs, bookmark questions, and mark questions as solved.
 

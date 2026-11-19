@@ -49,6 +49,25 @@ class MockAssessmentCatalogTest {
         assertEquals(37, questions.stream().filter(question -> question.getCategory().equals("NETWORKS")).count());
     }
 
+    @Test
+    void createsOriginalScenarioQuestionsWithTrustedTopicReferences() {
+        List<Question> aptitudeQuestions = MockAssessmentCatalog.createAptitudeQuestions(
+                null, 1, MockAssessmentCatalog.APTITUDE_BANK_SIZE);
+        HashMap<String, com.placify.question.Topic> topics = new HashMap<>();
+        MockAssessmentCatalog.CORE_CATEGORIES.forEach(category -> topics.put(category, null));
+        List<Question> coreQuestions = MockAssessmentCatalog.createCoreQuestions(
+                topics, 1, MockAssessmentCatalog.CORE_BANK_SIZE);
+
+        assertTrue(aptitudeQuestions.get(0).getTitle().contains("successive discounts"));
+        assertTrue(aptitudeQuestions.stream().allMatch(question ->
+                question.getDescription().startsWith("Original Placify practice question.")
+                        && question.getExternalLink().startsWith("https://www.indiabix.com/")));
+        assertTrue(coreQuestions.get(0).getTitle().contains("volatile"));
+        assertTrue(coreQuestions.stream().allMatch(question ->
+                question.getDescription().startsWith("Original Placify practice question.")
+                        && question.getExternalLink().startsWith("https://www.geeksforgeeks.org/")));
+    }
+
     private void assertQuestionsHaveFourOptionsAndValidAnswers(List<Question> questions) {
         Set<String> validOptions = Set.of("A", "B", "C", "D");
         for (Question question : questions) {
@@ -58,7 +77,7 @@ class MockAssessmentCatalogTest {
                     question.getOptionC(),
                     question.getOptionD()
             );
-            assertEquals(4, options.stream().distinct().count(), question.getTitle());
+            assertEquals(4, options.stream().distinct().count(), question.getTitle() + " " + options);
             assertFalse(options.stream().anyMatch(String::isBlank), question.getTitle());
             assertTrue(validOptions.contains(question.getCorrectOption()), question.getTitle());
             assertNotNull(question.getExplanation(), question.getTitle());

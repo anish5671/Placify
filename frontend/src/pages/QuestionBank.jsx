@@ -546,15 +546,23 @@ export default function QuestionBank() {
                     </button>
 
                     {q.externalLink && (
-                      <a
-                        href={q.externalLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1 font-medium"
-                      >
-                        <span>LeetCode</span>
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
+                      <div className="flex items-center gap-2">
+                        {q.description?.startsWith('Original Placify practice question.') && (
+                          <span className="text-[10px] text-slate-500">Original question · concept reference:</span>
+                        )}
+                        <a
+                          href={q.externalLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1 font-medium"
+                        >
+                          <span>
+                            {q.externalLink.includes('indiabix.com') ? 'IndiaBIX' :
+                              q.externalLink.includes('geeksforgeeks.org') ? 'GeeksforGeeks' : 'LeetCode'}
+                          </span>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      </div>
                     )}
                   </div>
                 </div>
