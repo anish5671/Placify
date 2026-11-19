@@ -22,6 +22,6 @@ public class ResumeAnalysisController {
             @RequestPart(value = "jobDescription", required = false) String jobDescription) {
         return ResponseEntity.ok(ApiResponse.success(
                 "Resume analyzed successfully",
-                analysisService.analyze(file, jobDescription)));
+                analysisService.analyze(file, jobDescription))) ;
     }
 }
