@@ -37,6 +37,7 @@ export default function ForgotPassword() {
         </div>
         <h1 className="text-3xl font-extrabold text-white tracking-tight">Forgot password?</h1>
         <p className="mt-2 text-sm text-slate-400">We’ll email you a link to reset it.</p>
+        <p className="mt-1 text-xs text-slate-500">The reset link expires after 15 minutes.</p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md relative z-10">
