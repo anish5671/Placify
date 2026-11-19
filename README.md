@@ -31,7 +31,7 @@ Placify is a full-stack web application that helps students and software enginee
 
 ### Dashboard
 - View question-solving progress, mock-test results, and preparation statistics.
-- Review topic progress and recent test attempts.
+- Review topic progress   and recent test attempts.
 
 ### Company Preparation
 - Explore preparation information for TCS, Amazon, Infosys, Accenture, Google, Microsoft, Wipro, and Cognizant.
