@@ -45,3 +45,18 @@ services:
         value: https://generativelanguage.googleapis.com
       - key: RESUME_MAX_FILE_SIZE_BYTES
         value: "10485760"
+
+  - type: web
+    name: preptrack-frontend
+    runtime: static
+    branch: main
+    buildCommand: cd frontend && npm ci && npm run build
+    staticPublishPath: ./frontend/dist
+    autoDeploy: true
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_BASE_URL
+        sync: false

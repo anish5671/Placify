@@ -156,9 +156,9 @@ npm run dev
 
 Open the local address printed by Vite, usually `http://localhost:5173`.
 
-## Deploy with Vercel, Render, and Supabase
+## Deploy on Render with Supabase
 
-The repository includes a GitHub Actions workflow at `.github/workflows/ci.yml` and a Render Blueprint at `render.yaml`. The workflow runs Maven tests and the Vite production build for pull requests and pushes to `main` or `master`. Vercel and Render deploy from their Git integrations; no hosting credentials are stored in GitHub Actions or the repository.
+The repository includes a Render Blueprint at `render.yaml` that deploys the Spring Boot backend and Vite frontend as separate Render services. PostgreSQL is hosted on Supabase; no database or application secrets are stored in the repository. The GitHub Actions workflow at `.github/workflows/ci.yml` runs Maven tests and the Vite production build for pull requests and pushes to `main` or `master`.
 
 ### Supabase database
 
@@ -166,17 +166,16 @@ The repository includes a GitHub Actions workflow at `.github/workflows/ci.yml` 
 2. In the Supabase dashboard, open the database connection details and select the **Session pooler** connection.
 3. Use its host, port, database, and username to configure Render's environment variables. Build the JDBC URL as `jdbc:postgresql://<pooler-host>:<port>/<database>?sslmode=require`. Keep the pooler username and database password private.
 
-### Render backend
+### Render services
 
-1. Connect the GitHub repository to Render and create a Blueprint using the root `render.yaml`, or create a Docker web service manually. The Blueprint selects Render's free web-service plan.
-2. For a manual service, use branch `main`, Dockerfile `backend/Dockerfile`, and Docker context `backend`.
-3. Set these environment variables in the Render dashboard:
+1. Connect the GitHub repository to Render and create a Blueprint from the root `render.yaml`. It creates a backend web service and a static frontend site; both deploy from `main`.
+2. Set these backend environment variables in the Render dashboard:
    - `SPRING_DATASOURCE_URL`: Supabase session-pooler JDBC URL with `sslmode=require`.
    - `SPRING_DATASOURCE_USERNAME`: pooler username from Supabase.
    - `SPRING_DATASOURCE_PASSWORD`: database password from Supabase.
    - `APP_JWT_SECRET`: a newly generated Base64-encoded random key containing at least 32 bytes.
-   - `APP_CORS_ALLOWED_ORIGINS`: exact frontend origin(s), comma-separated and without trailing slashes.
-   - `APP_FRONTEND_URL`: frontend origin used to build password-reset links.
+   - `APP_CORS_ALLOWED_ORIGINS`: exact Render frontend origin, without a trailing slash. Set this after the frontend service is created.
+   - `APP_FRONTEND_URL`: same frontend origin, used to build password-reset links.
    - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, and `SMTP_FROM`: mail provider settings for password resets.
    - `SMTP_AUTH` and `SMTP_STARTTLS`: optional SMTP settings; both default to `true`.
    - `JUDGE0_AUTH_TOKEN`: optional; only set this if the chosen Judge0 provider requires it.
@@ -184,26 +183,20 @@ The repository includes a GitHub Actions workflow at `.github/workflows/ci.yml` 
    - `GEMINI_MODEL`: configurable Gemini model name; defaults to `gemini-2.5-flash`.
    - `GEMINI_BASE_URL`: defaults to `https://generativelanguage.googleapis.com`.
    - `RESUME_MAX_FILE_SIZE_BYTES`: upload limit, default `10485760` (10 MB).
-4. The health check uses `GET /api/questions`. Deploy the latest backend revision so its `/api/auth/forgot-password` and `/api/auth/reset-password` endpoints are available. After the first Vercel deployment, set `APP_CORS_ALLOWED_ORIGINS` to the actual Vercel production URL and redeploy the backend.
-5. Resume analysis uses local PDF/DOCX extraction, skill/role matching, and checklist scoring. Gemini only provides optional written feedback; if Gemini is unavailable or returns 403, the local analysis and role matches still appear with an explicit AI status.
-6. To enable Gemini feedback, create a key in Google AI Studio, confirm the Generative Language API and selected model are available to its project, and set `GEMINI_API_KEY` in Render's backend environment. Keep the key out of Vercel, frontend variables, source files, screenshots, and Git. `GEMINI_MODEL` defaults to `gemini-2.5-flash`.
+3. Set the frontend service's `VITE_API_BASE_URL` environment variable to the backend's public URL ending in `/api` (for example, `https://preptrack-backend.onrender.com/api`). The Blueprint marks this value as `sync: false` because the actual backend URL is assigned by Render.
+4. After both services have deployed, set the backend's `APP_CORS_ALLOWED_ORIGINS` and `APP_FRONTEND_URL` to the frontend's actual Render URL, without a trailing slash, then redeploy the backend.
+5. The backend health check uses `GET /api/questions`. The static site rewrites client-side routes to `index.html`. Do not add `GEMINI_API_KEY` or other secrets to the frontend service; the browser calls the backend, which calls Gemini.
+6. To enable Gemini feedback, create a key in Google AI Studio, confirm the Generative Language API and selected model are available to its project, and set `GEMINI_API_KEY` on the Render backend. `GEMINI_MODEL` defaults to `gemini-2.5-flash`.
 
-### Vercel frontend
-
-1. Import the same GitHub repository into Vercel and set **Root Directory** to `frontend`.
-2. Use build command `npm run build` and output directory `dist`.
-3. Set the Production environment variable `VITE_API_BASE_URL` to the URL of the Render backend that has the latest code, ending in `/api` (for example, `https://<your-render-service>.onrender.com/api`). Redeploy Vercel after changing it. Do not add the Gemini key to Vercel; the browser calls the backend, which calls Gemini.
-4. The existing `frontend/vercel.json` rewrites SPA routes to `index.html`.
+The free Render web service is suitable for testing and hobby projects, not production: it spins down after 15 minutes without traffic and its first request after that can take about a minute. Check Render's current billing dashboard and do not select a paid plan if you do not want charges.
 
 ### Continuous integration and automatic deployments
 
-Connect both providers to the GitHub repository and set their production branch to `main`. Enable automatic deployment on pushes in Render; Vercel automatically creates preview deployments for pull requests and production deployments after merges to the production branch.
-
-The Render free web service is suitable for testing and hobby projects, not production: it spins down after 15 minutes without traffic and its first request after that can take about a minute. Free service usage and monthly limits can change; check Render's current billing dashboard and do not select a paid plan if you do not want charges.
+Both Render services are configured to deploy automatically from `main`.
 
 For CI-gated production deployments, configure GitHub branch protection for `main`: require pull requests and require both `Backend tests` and `Frontend build` status checks before merging. Deployments then happen after a passing PR is merged. Test the live frontend, login, database-backed question list, and a coding battle after initial setup.
 
-Never put Supabase credentials, JWT signing keys, or Judge0 tokens in YAML, frontend `VITE_` variables, or committed files. If a credential was previously committed, rotate it in its provider dashboard.
+Never put Supabase credentials, JWT signing keys, Gemini API keys, or Judge0 tokens in YAML, frontend `VITE_` variables, or committed files. If a credential was previously committed, rotate it in its provider dashboard.
 
 ### Resume Analyzer API
 
