@@ -16,6 +16,7 @@ import api from '../api/client';
 export default function CompanyPrep() {
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [search, setSearch] = useState('');
   const [difficultyFilter, setDifficultyFilter] = useState('ALL');
 
@@ -29,9 +30,15 @@ export default function CompanyPrep() {
       const res = await api.get('/companies');
       if (res.data.success) {
         setCompanies(res.data.data);
+        setLoadError('');
+      } else {
+        setCompanies([]);
+        setLoadError('The company service returned an unsuccessful response.');
       }
     } catch (err) {
       console.error('Failed to load companies', err);
+      setCompanies([]);
+      setLoadError(err.response?.data?.message || 'Unable to load companies. Check that the backend is running, then try again.');
     } finally {
       setLoading(false);
     }
@@ -89,6 +96,19 @@ export default function CompanyPrep() {
         <div className="flex flex-col items-center justify-center min-h-[40vh] gap-3">
           <div className="w-10 h-10 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
           <p className="text-sm text-slate-400">Loading companies & roadmaps...</p>
+        </div>
+      ) : loadError ? (
+        <div role="alert" className="p-6 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-sm text-rose-200">
+          <p>{loadError}</p>
+          <button onClick={fetchCompanies} className="mt-3 px-3 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 font-bold">
+            Try again
+          </button>
+        </div>
+      ) : filteredCompanies.length === 0 ? (
+        <div className="py-12 text-center rounded-2xl bg-slate-900/60 border border-dashed border-slate-800">
+          <Building2 className="w-10 h-10 text-slate-600 mx-auto mb-2" />
+          <p className="text-sm font-semibold text-slate-300">No companies match your search</p>
+          <p className="text-xs text-slate-500 mt-1">Try another company name or difficulty.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">

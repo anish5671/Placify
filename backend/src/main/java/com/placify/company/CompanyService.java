@@ -1,8 +1,9 @@
 package com.placify.company;
 
 import com.placify.exception.ResourceNotFoundException;
-import com.placify.question.Question;
+import com.placify.question.QuestionDto;
 import com.placify.question.QuestionRepository;
+import com.placify.question.QuestionService;
 import com.placify.test.Test;
 import com.placify.test.TestRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ public class CompanyService {
 
     private final CompanyRepository companyRepository;
     private final QuestionRepository questionRepository;
+    private final QuestionService questionService;
     private final TestRepository testRepository;
 
     @Transactional(readOnly = true)
@@ -40,10 +42,10 @@ public class CompanyService {
     }
 
     @Transactional(readOnly = true)
-    public List<Question> getCompanyQuestions(Long companyId) {
+    public List<QuestionDto> getCompanyQuestions(Long companyId) {
         Company company = companyRepository.findById(companyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Company", "id", companyId));
-        return questionRepository.findByCompanyTag(company.getCode());
+        return questionService.getQuestions(null, null, null, null, company.getCode());
     }
 
     @Transactional(readOnly = true)

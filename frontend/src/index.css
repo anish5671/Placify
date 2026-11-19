@@ -2,10 +2,112 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  color-scheme: light;
+  --color-primary: #651C2D;
+  --color-secondary: #761F35;
+  --color-hover: #A43D50;
+  --color-background: #F2F3F5;
+  --color-card: #FFFFFF;
+  --color-text: #29272A;
+  --color-muted: #73717A;
+  --color-border: #DEDFE3;
+  --color-soft-pink: #F7E9ED;
+  --color-success: #25845A;
+  --color-warning: #D99A32;
+}
+
 @layer base {
-  body {
-    @apply bg-slate-900 text-slate-100 min-h-screen selection:bg-indigo-500 selection:text-white font-sans;
+  html {
+    background: var(--color-background);
   }
+
+  body {
+    @apply min-h-screen bg-slate-50 font-sans text-slate-900 antialiased selection:bg-indigo-500 selection:text-white;
+  }
+
+  input,
+  select,
+  textarea {
+    color: var(--color-text);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-muted);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-hover);
+    outline-offset: 2px;
+  }
+}
+
+.text-slate-100,
+.text-slate-200,
+.text-slate-900 {
+  color: var(--color-text);
+}
+
+.text-slate-300 {
+  color: #4C4A50;
+}
+
+.text-slate-400,
+.text-slate-500 {
+  color: var(--color-muted);
+}
+
+.text-slate-600 {
+  color: #5E5C63;
+}
+
+/* White text utilities were authored for the previous dark surfaces. Keep headings and
+   card content readable on the new light surfaces while preserving button contrast. */
+.text-white:is(h1, h2, h3, h4, p, label, span, strong, td, th),
+h1 .text-white,
+h2 .text-white,
+h3 .text-white,
+h4 .text-white,
+p .text-white,
+label .text-white {
+  color: var(--color-text);
+}
+
+button.text-white,
+a.text-white,
+button .text-white,
+a .text-white {
+  color: #FFFFFF;
+}
+
+.fixed.inset-0[class~="bg-slate-950/80"] {
+  background-color: rgb(41 39 42 / 58%);
+}
+
+[data-code-workspace] {
+  color-scheme: dark;
+  border-color: #293040;
+}
+
+[data-code-workspace] > div:first-child {
+  border-color: #293040;
+}
+
+[data-code-workspace] select {
+  color: #F2F3F5;
+  background-color: #151B2A;
+  border-color: #394154;
+}
+
+[data-code-workspace] textarea {
+  color: #F2F3F5;
+  caret-color: #F2F3F5;
+}
+
+[data-code-workspace] button:not(.bg-indigo-600) {
+  color: #E8E9EC;
+  border-color: #394154;
 }
 
 /* Custom scrollbars */
@@ -14,12 +116,20 @@
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: #E8E9EC;
 }
 ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #B9B8BE;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: #73717A;
+}
+
+[data-code-workspace] textarea::-webkit-scrollbar-track {
+  background: #151B2A;
+}
+
+[data-code-workspace] textarea::-webkit-scrollbar-thumb {
+  background: #394154;
 }

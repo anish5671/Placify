@@ -65,7 +65,7 @@ export default function Dashboard() {
               <span>Target: {user?.targetCompany || 'Top Tech'} • {user?.targetRole || 'Software Engineer'}</span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              Welcome back, {user?.fullName || user?.username}! 🎯
+              Welcome back, {user?.fullName || user?.username}!
             </h2>
             <p className="text-slate-300 text-sm leading-relaxed">
               Track your mock test performance, solve company-tagged DSA questions, and monitor your overall readiness to land your offer.

@@ -43,7 +43,7 @@ export default function Navbar({ onMenuClick }) {
       <div className="flex items-center gap-3">
         <button
           onClick={onMenuClick}
-          className="lg:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 focus:outline-none"
+          className="lg:hidden p-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 focus:outline-none"
         >
           <Menu className="w-5 h-5" />
         </button>
@@ -103,7 +103,7 @@ export default function Navbar({ onMenuClick }) {
                   <Link
                     to="/profile"
                     onClick={() => setShowProfileMenu(false)}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-300 hover:text-slate-200 hover:bg-slate-800 transition-colors"
                   >
                     <UserIcon className="w-4 h-4 text-indigo-400" />
                     <span>My Profile & Progress</span>
@@ -111,7 +111,7 @@ export default function Navbar({ onMenuClick }) {
                   <Link
                     to="/companies"
                     onClick={() => setShowProfileMenu(false)}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-300 hover:text-slate-200 hover:bg-slate-800 transition-colors"
                   >
                     <Sparkles className="w-4 h-4 text-violet-400" />
                     <span>Company Roadmaps</span>

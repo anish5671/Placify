@@ -49,7 +49,7 @@ public class DataInitializer implements CommandLineRunner {
             log.info("Placify Data Seeding Completed Successfully!");
         }
 
-        seedMissingDsaQuestions();
+        seedMissingDsaQuestions(seedDsaModuleTopics());
         syncDsaMockTest();
         seedAptitudeAndCoreQuestionBanks();
         syncAptitudeCoreMockTests();
@@ -71,7 +71,7 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private Map<String, Topic> seedTopics() {
-        List<Topic> topicList = List.of(
+        List<Topic> topicList = new ArrayList<>(List.of(
                 Topic.builder().name("Quantitative Aptitude").slug("quant").category("APTITUDE").description("Number system, percentages, ratios, profit & loss, time and work").icon("Calculator").build(),
                 Topic.builder().name("Logical Reasoning").slug("reasoning").category("REASONING").description("Puzzles, syllogisms, blood relations, seating arrangement").icon("Brain").build(),
                 Topic.builder().name("Verbal Ability").slug("verbal").category("VERBAL").description("Reading comprehension, sentence correction, vocabulary").icon("BookOpen").build(),
@@ -81,13 +81,34 @@ public class DataInitializer implements CommandLineRunner {
                 Topic.builder().name("Operating Systems").slug("os").category("OS").description("Process scheduling, multithreading, deadlocks, memory management").icon("Cpu").build(),
                 Topic.builder().name("Computer Networks").slug("networks").category("NETWORKS").description("OSI model, TCP/IP, HTTP/S, DNS, routing protocols").icon("Network").build(),
                 Topic.builder().name("Data Structures & Algorithms").slug("dsa").category("DSA").description("Arrays, strings, linked lists, trees, graphs, greedy and dynamic programming").icon("Binary").build()
-        );
+        ));
+        topicList.addAll(DsaPracticeCatalog.createModuleTopics());
 
         Map<String, Topic> map = new HashMap<>();
         for (Topic t : topicRepository.saveAll(topicList)) {
             map.put(t.getSlug(), t);
         }
         return map;
+    }
+
+    private Map<String, Topic> seedDsaModuleTopics() {
+        Map<String, Topic> existingBySlug = new HashMap<>();
+        topicRepository.findAll().forEach(topic -> existingBySlug.put(topic.getSlug(), topic));
+        List<Topic> missingTopics = DsaPracticeCatalog.createModuleTopics().stream()
+                .filter(topic -> !existingBySlug.containsKey(topic.getSlug()))
+                .toList();
+        topicRepository.saveAll(missingTopics);
+        missingTopics.forEach(topic -> existingBySlug.put(topic.getSlug(), topic));
+
+        Map<String, Topic> moduleTopics = new HashMap<>();
+        for (DsaPracticeCatalog.Module module : DsaPracticeCatalog.MODULES) {
+            Topic topic = existingBySlug.get("dsa-" + module.slug());
+            if (topic == null) {
+                throw new IllegalStateException("Missing DSA module topic: " + module.name());
+            }
+            moduleTopics.put(module.slug(), topic);
+        }
+        return moduleTopics;
     }
 
     private Map<String, Company> seedCompanies() {
@@ -652,37 +673,87 @@ public class DataInitializer implements CommandLineRunner {
                 .sampleOutput("3")
                 .build());
 
-        qList.addAll(DsaPracticeCatalog.createQuestions(dsa));
+        qList.addAll(DsaPracticeCatalog.createQuestions(dsaModuleTopicsFrom(topics)));
         return questionRepository.saveAll(qList);
     }
 
-    private void seedMissingDsaQuestions() {
-        long existingCount = questionRepository.countByCategoryIgnoreCase("DSA");
-        if (existingCount >= DsaPracticeCatalog.TARGET_SIZE) {
-            return;
+    private Map<String, Topic> dsaModuleTopicsFrom(Map<String, Topic> topics) {
+        Map<String, Topic> moduleTopics = new HashMap<>();
+        for (DsaPracticeCatalog.Module module : DsaPracticeCatalog.MODULES) {
+            Topic topic = topics.get("dsa-" + module.slug());
+            if (topic == null) {
+                throw new IllegalStateException("The DSA module topic is required: " + module.name());
+            }
+            moduleTopics.put(module.slug(), topic);
+        }
+        return moduleTopics;
+    }
+
+    private void seedMissingDsaQuestions(Map<String, Topic> moduleTopics) {
+        List<Question> existingQuestions = questionRepository.findByCategoryIgnoreCase("DSA");
+        long existingCount = existingQuestions.size();
+        Map<String, Question> existingByTitle = new HashMap<>();
+        existingQuestions.forEach(question -> existingByTitle.put(question.getTitle(), question));
+
+        List<Question> synchronizedQuestions = new ArrayList<>();
+        for (Question catalogQuestion : DsaPracticeCatalog.createQuestions(moduleTopics)) {
+            Question existing = existingByTitle.get(catalogQuestion.getTitle());
+            if (existing != null) {
+                copyDsaCatalogQuestion(catalogQuestion, existing);
+                synchronizedQuestions.add(existing);
+            } else if (existingCount < DsaPracticeCatalog.TARGET_SIZE) {
+                synchronizedQuestions.add(catalogQuestion);
+                existingCount++;
+            }
         }
 
-        Topic topic = topicRepository.findBySlug("dsa").orElse(null);
-        if (topic == null) {
-            log.warn("Skipping DSA catalog seeding because the DSA topic has not been initialized.");
-            return;
+        for (Question question : existingQuestions) {
+            String moduleSlug = legacyDsaModule(question.getTitle());
+            if (moduleSlug != null) {
+                question.setTopic(moduleTopics.get(moduleSlug));
+                synchronizedQuestions.add(question);
+            }
         }
 
-        Set<String> existingTitles = new HashSet<>();
-        questionRepository.findByCategoryIgnoreCase("DSA").stream()
-                .map(Question::getTitle)
-                .forEach(existingTitles::add);
-
-        List<Question> missingQuestions = DsaPracticeCatalog.createQuestions(topic).stream()
-                .filter(question -> !existingTitles.contains(question.getTitle()))
-                .limit(DsaPracticeCatalog.TARGET_SIZE - existingCount)
-                .toList();
-
-        if (!missingQuestions.isEmpty()) {
-            questionRepository.saveAll(missingQuestions);
-            log.info("Seeded {} DSA practice questions; total DSA question count is now {}.",
-                    missingQuestions.size(), existingCount + missingQuestions.size());
+        if (!synchronizedQuestions.isEmpty()) {
+            questionRepository.saveAll(synchronizedQuestions);
         }
+
+        long totalAfterSync = questionRepository.countByCategoryIgnoreCase("DSA");
+        log.info("Synchronized DSA modules; DSA question count is {}.", totalAfterSync);
+        if (totalAfterSync != DsaPracticeCatalog.TARGET_SIZE) {
+            log.warn("Expected {} DSA questions across modules, found {}.",
+                    DsaPracticeCatalog.TARGET_SIZE, totalAfterSync);
+        }
+    }
+
+    private String legacyDsaModule(String title) {
+        if (title.startsWith("Two Sum:")) return "arrays";
+        if (title.equals("Longest Substring Without Repeating Characters")) return "strings";
+        if (title.equals("Reverse a Linked List")) return "linked-list";
+        if (title.startsWith("Binary Search:")) return "binary-search";
+        if (title.equals("Lowest Common Ancestor of a Binary Tree")) return "trees";
+        if (title.startsWith("Climbing Stairs") || title.startsWith("Coin Change:")) {
+            return "dynamic-programming";
+        }
+        if (title.startsWith("Number of Islands")) return "graphs";
+        return null;
+    }
+
+    private void copyDsaCatalogQuestion(Question source, Question target) {
+        target.setDescription(source.getDescription());
+        target.setTopic(source.getTopic());
+        target.setCategory(source.getCategory());
+        target.setDifficulty(source.getDifficulty());
+        target.setQuestionType(source.getQuestionType());
+        target.setOptionA(source.getOptionA());
+        target.setOptionB(source.getOptionB());
+        target.setOptionC(source.getOptionC());
+        target.setOptionD(source.getOptionD());
+        target.setCorrectOption(source.getCorrectOption());
+        target.setExplanation(source.getExplanation());
+        target.setCompanyTags(source.getCompanyTags());
+        target.setExternalLink(source.getExternalLink());
     }
 
     private void syncDsaMockTest() {
