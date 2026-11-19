@@ -17,7 +17,7 @@ public record ResumeAnalysisResult(
             String role,
             int matchPercentage,
             List<String> matchingSkills,
-            List<String> missingSkills) {}
+            List<String> missingSkills) {} 
 
     public record JobDescriptionMatch(
             int matchPercentage,
