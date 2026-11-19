@@ -1,7 +1,7 @@
 package com.placify.company;
 
 import com.placify.common.ApiResponse;
-import com.placify.question.Question;
+import com.placify.question.QuestionDto;
 import com.placify.test.Test;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +27,7 @@ public class CompanyController {
     }
 
     @GetMapping("/{id}/questions")
-    public ResponseEntity<ApiResponse<List<Question>>> getCompanyQuestions(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<List<QuestionDto>>> getCompanyQuestions(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success(companyService.getCompanyQuestions(id)));
     }
 
