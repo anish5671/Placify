@@ -843,6 +843,7 @@ public class DataInitializer implements CommandLineRunner {
         target.setCorrectOption(source.getCorrectOption());
         target.setExplanation(source.getExplanation());
         target.setHint(source.getHint());
+        target.setCompanyTags(source.getCompanyTags());
         target.setExternalLink(source.getExternalLink());
     }
 
