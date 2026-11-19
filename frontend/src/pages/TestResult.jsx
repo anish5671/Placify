@@ -267,7 +267,7 @@ export default function TestResult() {
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
                       activeReviewTab === tab.id
                         ? 'bg-indigo-500/15 text-indigo-300 border-indigo-500/30'
-                        : 'bg-slate-950 text-slate-300 border-slate-800 hover:text-white'
+                        : 'bg-slate-950 text-slate-300 border-slate-800 hover:text-slate-200'
                     }`}
                   >
                     {tab.label}

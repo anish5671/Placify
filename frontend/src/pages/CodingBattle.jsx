@@ -272,7 +272,7 @@ export default function CodingBattle() {
     <div className="mx-auto max-w-[1500px] space-y-4">
       <div className="flex flex-col gap-3 rounded-2xl border border-slate-800 bg-slate-900/90 p-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-3">
-          <Link to="/battle" className="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white" aria-label="Back to battles"><ArrowLeft className="h-4 w-4" /></Link>
+          <Link to="/battle" className="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-slate-200" aria-label="Back to battles"><ArrowLeft className="h-4 w-4" /></Link>
           <div>
             <div className="text-xs font-semibold uppercase tracking-wider text-indigo-300">Room {room.code}</div>
             <div className="text-lg font-bold text-white">{room.problem.title}</div>

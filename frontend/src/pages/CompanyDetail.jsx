@@ -248,7 +248,7 @@ export default function CompanyDetail() {
 
   return (
     <div className="space-y-6">
-      <Link to="/companies" className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white transition-colors">
+      <Link to="/companies" className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-slate-200 transition-colors">
         <ArrowLeft className="w-4 h-4" /> Back to Company Directory
       </Link>
 
@@ -280,7 +280,7 @@ export default function CompanyDetail() {
         {TABS.map(({ id: tabId, label, icon: Icon }) => (
           <button key={tabId} onClick={() => setActiveTab(tabId)} aria-current={activeTab === tabId ? 'page' : undefined}
             className={`whitespace-nowrap px-3 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-colors ${
-              activeTab === tabId ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              activeTab === tabId ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
             }`}>
             <Icon className="w-4 h-4" /> {label}
           </button>
@@ -646,11 +646,11 @@ function QuestionCard({ question, index, revealed, onReveal, onBookmark, onSolve
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <button onClick={onBookmark} aria-pressed={Boolean(question.isBookmarked)} aria-label={question.isBookmarked ? 'Remove bookmark' : 'Bookmark question'}
-            className={`p-2 rounded-lg border ${question.isBookmarked ? 'text-amber-400 border-amber-500/30' : 'text-slate-400 border-slate-800 hover:text-white'}`}>
+            className={`p-2 rounded-lg border ${question.isBookmarked ? 'text-amber-400 border-amber-500/30' : 'text-slate-400 border-slate-800 hover:text-slate-200'}`}>
             <Bookmark className="w-4 h-4" />
           </button>
           <button onClick={onSolve} aria-pressed={Boolean(question.isSolved)} aria-label={question.isSolved ? 'Mark question unsolved' : 'Mark question solved'}
-            className={`p-2 rounded-lg border ${question.isSolved ? 'text-emerald-400 border-emerald-500/30' : 'text-slate-400 border-slate-800 hover:text-white'}`}>
+            className={`p-2 rounded-lg border ${question.isSolved ? 'text-emerald-400 border-emerald-500/30' : 'text-slate-400 border-slate-800 hover:text-slate-200'}`}>
             <CheckCircle2 className="w-4 h-4" />
           </button>
         </div>

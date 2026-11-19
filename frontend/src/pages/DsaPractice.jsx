@@ -222,7 +222,7 @@ export default function DsaPractice() {
                           className={`p-1.5 rounded-lg border transition-colors ${
                             p.isBookmarked
                               ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                              : 'text-slate-400 hover:text-white border-slate-800'
+                              : 'text-slate-400 hover:text-slate-200 border-slate-800'
                           }`}
                           title="Bookmark Problem"
                         >
@@ -262,7 +262,7 @@ export default function DsaPractice() {
 
               <button
                 onClick={() => setActiveModalProblem(null)}
-                className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                className="p-2 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
