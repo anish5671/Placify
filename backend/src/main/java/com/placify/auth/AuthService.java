@@ -21,6 +21,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider tokenProvider;
+    private final PasswordResetService passwordResetService;
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -85,5 +86,13 @@ public class AuthService {
                 .graduationYear(user.getGraduationYear())
                 .role(user.getRole())
                 .build();
+    }
+
+    public void requestPasswordReset(String email) {
+        passwordResetService.requestPasswordReset(email);
+    }
+
+    public void resetPassword(String token, String password) {
+        passwordResetService.resetPassword(token, password);
     }
 }

@@ -119,14 +119,24 @@ export default function Login() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                Password
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label htmlFor="login-password" className="block text-xs font-semibold text-slate-300">
+                  Password
+                </label>
+                <Link
+                  to="/forgot-password"
+                  state={{ email: usernameOrEmail.includes('@') ? usernameOrEmail : '' }}
+                  className="text-xs font-semibold text-indigo-400 hover:text-indigo-300"
+                >
+                  Forgot password?
+                </Link>
+              </div>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                   <Lock className="w-4 h-4" />
                 </div>
                 <input
+                  id="login-password"
                   type="password"
                   required
                   value={password}

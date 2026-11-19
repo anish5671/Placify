@@ -26,6 +26,7 @@ Placify is a full-stack web application that helps students and software enginee
 ### Authentication
 - Register and sign in with validated account details.
 - Use stateless JWT authentication and BCrypt password hashing.
+- Request a password-reset link by email; links expire after 15 minutes and can only be used once.
 - Try the demo account from the login page.
 
 ### Dashboard
@@ -85,6 +86,8 @@ Copy-Item backend\src\main\resources\application.example.properties backend\src\
 Keep your database password and JWT secret private. Each developer should use their own local values. Never commit `.env` files or put credentials in frontend environment variables.
 
 The default PostgreSQL database, user, and Compose volume identifiers are intentionally unchanged so an existing local database and its data continue to be reused. Do not rename these identifiers unless you also migrate the database and volume.
+
+Password reset email requires SMTP configuration. Set `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM`, and `APP_FRONTEND_URL` in the backend environment (`APP_FRONTEND_URL` must be the public frontend origin when deployed). `SMTP_AUTH` and `SMTP_STARTTLS` default to `true`. If SMTP is not configured, password-reset requests return an explicit service-unavailable error. To avoid disclosing whether an email is registered, requests use a generic response; mail delivery failures are logged on the backend.
 
 ## Run Everything with Docker Compose
 
@@ -172,6 +175,9 @@ The repository includes a GitHub Actions workflow at `.github/workflows/ci.yml` 
    - `SPRING_DATASOURCE_PASSWORD`: database password from Supabase.
    - `APP_JWT_SECRET`: a newly generated Base64-encoded random key containing at least 32 bytes.
    - `APP_CORS_ALLOWED_ORIGINS`: exact frontend origin(s), comma-separated and without trailing slashes.
+   - `APP_FRONTEND_URL`: frontend origin used to build password-reset links.
+   - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, and `SMTP_FROM`: mail provider settings for password resets.
+   - `SMTP_AUTH` and `SMTP_STARTTLS`: optional SMTP settings; both default to `true`.
    - `JUDGE0_AUTH_TOKEN`: optional; only set this if the chosen Judge0 provider requires it.
    - `GEMINI_API_KEY`: Google Gemini API key for Resume Analyzer. Keep it backend-only.
    - `GEMINI_MODEL`: configurable Gemini model name; defaults to `gemini-2.5-flash`.
