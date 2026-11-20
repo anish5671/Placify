@@ -34,7 +34,7 @@ Placify is a full-stack web application that helps students and software enginee
 - Review topic progress and recent test attempts.
 
 ### Company Preparation
-- Explore preparation information for  TCS, Amazon, Infosys, Accenture, Google, Microsoft, Wipro, and Cognizant .
+- Explore preparation information for  TCS, Amazon , Infosys, Accenture, Google, Microsoft, Wipro, and Cognizant .
 - Review hiring stages, exam patterns, eligibility details, and company-related questions.
 
 ### Question Bank
