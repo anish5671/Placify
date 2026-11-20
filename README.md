@@ -218,3 +218,9 @@ Add deployment screenshots here as the Resume Analyzer UI is promoted between en
 - Password: `password123`
 
 You can also use the demo sign-in option on the login page.
+
+Project Link:
+
+http://13.127.16.126
+
+
