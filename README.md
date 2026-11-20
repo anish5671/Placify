@@ -46,7 +46,7 @@ Placify is a full-stack web application that helps students and software enginee
 ### DSA Practice
 - Browse 220 practice problems in 11 topic modules, with 20 problems in each module.
 - Review original problem summaries and suggested approaches without difficulty labels.
-- Problems are curated from important LeetCode, GeeksforGeeks, and Striver practice patterns; question summaries are original and no sheet links are displayed.
+- Problems are curated from important LeetCode, GeeksforGeeks, and Striver practice patterns; question summaries are original and no sheet  links are displayed.
 - Per-problem links search LeetCode for the relevant problem.
 - Track solved problems and bookmarks.
 
