@@ -48,7 +48,7 @@ Placify is a full-stack web application that helps students and software enginee
 - Review original problem summaries and suggested approaches without difficulty labels.
 - Problems are curated from important LeetCode, GeeksforGeeks, and Striver practice patterns; question summaries are original and no sheet  links are displayed.
 - Per-problem links search LeetCode for the relevant problem.
-- Track solved problems and bookmarks.
+- Track solved problems and  bookmarks.
 
 ### Mock Tests
 - Take timed company, core computer science, and DSA assessments.
